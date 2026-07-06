@@ -71,10 +71,26 @@ export class RefreshTokenService {
     await this.sessionCacheService.deleteSession(tokenHash);
   }
 
+  /**
+   * Revoke all active tokens for a user and purge their Redis session cache.
+   * This is used for "logout all devices" — invalidating every active session.
+   */
   async revokeAllForUser(userId: string): Promise<void> {
+    // Fetch all active token hashes before revoking, so we can clear Redis
+    const activeTokens = await this.refreshTokenRepository.find({
+      where: { user: { id: userId } as User, isRevoked: false },
+      select: ['tokenHash'],
+    });
+
+    // Mark all as revoked in PostgreSQL
     await this.refreshTokenRepository.update(
       { user: { id: userId } as User, isRevoked: false },
       { isRevoked: true },
+    );
+
+    // Remove each session entry from Redis
+    await Promise.all(
+      activeTokens.map((t) => this.sessionCacheService.deleteSession(t.tokenHash)),
     );
   }
 

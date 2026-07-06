@@ -7,6 +7,7 @@ import {
 import { UsersService } from '../../users/users.service';
 import { OtpService } from './otp.service';
 import { TokenService } from './token.service';
+import { RefreshTokenService } from './refresh-token.service';
 import { SessionCacheService } from './session-cache.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -14,6 +15,7 @@ import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { RequestPasswordResetDto } from '../dto/request-password-reset.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { AuthResponseDto } from '../dto/auth-response.dto';
+import { UserResponseDto } from '../../users/dto/user-response.dto';
 import { User } from '../../users/entities/user.entity';
 
 @Injectable()
@@ -22,6 +24,7 @@ export class AuthService {
     private usersService: UsersService,
     private otpService: OtpService,
     private tokenService: TokenService,
+    private refreshTokenService: RefreshTokenService,
     private sessionCacheService: SessionCacheService,
   ) {}
 
@@ -53,7 +56,7 @@ export class AuthService {
     }
 
     if (!user.isEmailVerified) {
-      throw new ForbiddenException('Email not verified');
+      throw new ForbiddenException('Email not verified. Please verify your email before logging in.');
     }
 
     await this.usersService.updateLastLogin(user.id);
@@ -93,5 +96,41 @@ export class AuthService {
     await this.otpService.verifyOtp('reset', email, otp);
     const newPasswordHash = await User.hashPassword(newPassword);
     await this.usersService.updatePassword(user.id, newPasswordHash);
+  }
+
+  /**
+   * Rotate a refresh token — invalidate the old one and issue a new pair.
+   * Implements token rotation: if an already-revoked token is presented,
+   * the entire family is revoked (replay-attack detection upstream in
+   * RefreshTokenService.validate).
+   */
+  async refresh(
+    refreshToken: string,
+    deviceInfo?: string,
+    ipAddress?: string,
+  ): Promise<AuthResponseDto> {
+    return this.tokenService.rotateRefreshToken(refreshToken, deviceInfo, ipAddress);
+  }
+
+  /**
+   * Logout from a single device — revoke the presented refresh token.
+   */
+  async logout(refreshToken: string): Promise<void> {
+    await this.refreshTokenService.revoke(refreshToken);
+  }
+
+  /**
+   * Logout from all devices — revoke every active refresh token for the user.
+   */
+  async logoutAll(userId: string): Promise<void> {
+    await this.refreshTokenService.revokeAllForUser(userId);
+  }
+
+  /**
+   * Return the current authenticated user's profile.
+   */
+  async getMe(userId: string): Promise<UserResponseDto> {
+    const user = await this.usersService.findById(userId);
+    return new UserResponseDto(user);
   }
 }

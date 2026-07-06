@@ -21,6 +21,13 @@ export class UserResponseDto {
   @ApiProperty({ enum: UserRole, example: UserRole.CUSTOMER })
   role: UserRole;
 
+  /**
+   * Primary verified flag — maps to `isEmailVerified` on the entity.
+   * Named `isVerified` to match the frontend's User type contract.
+   */
+  @ApiProperty({ example: true })
+  isVerified: boolean;
+
   @ApiProperty({ example: true })
   isEmailVerified: boolean;
 
@@ -40,6 +47,7 @@ export class UserResponseDto {
     this.email = user.email;
     this.phone = user.phone;
     this.role = user.role;
+    this.isVerified = user.isEmailVerified;
     this.isEmailVerified = user.isEmailVerified;
     this.isPhoneVerified = user.isPhoneVerified;
     this.isActive = user.isActive;

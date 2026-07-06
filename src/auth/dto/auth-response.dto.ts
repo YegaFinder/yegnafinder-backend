@@ -11,3 +11,15 @@ export class AuthResponseDto {
   @ApiProperty({ type: UserResponseDto })
   user: UserResponseDto;
 }
+
+/** Standard JSON envelope every endpoint returns. */
+export class ApiEnvelope<T> {
+  @ApiProperty({ example: true })
+  success: boolean;
+
+  @ApiProperty()
+  data: T;
+
+  @ApiProperty({ example: 'Operation successful', required: false })
+  message?: string;
+}

@@ -19,7 +19,12 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: '*', // For Sprint 1, in prod should be specific PWA origin
+    // Allow the Next.js dev server and any configured production PWA origin.
+    // NEXT_PUBLIC_API_URL in the frontend points to localhost:8000, and the
+    // frontend itself runs on localhost:3000 by default.
+    origin: process.env.FRONTEND_ORIGIN
+      ? process.env.FRONTEND_ORIGIN.split(',')
+      : ['http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
