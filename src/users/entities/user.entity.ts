@@ -18,8 +18,8 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   phone?: string;
 
-  @Column({ name: 'password_hash', type: 'varchar', length: 255 })
-  passwordHash: string;
+  @Column({ name: 'password_hash', type: 'varchar', length: 255, nullable: true })
+  passwordHash?: string;
 
   @Column({
     type: 'enum',
@@ -40,6 +40,9 @@ export class User extends BaseEntity {
   @Column({ name: 'fcm_token', type: 'varchar', length: 255, nullable: true })
   fcmToken?: string;
 
+  @Column({ name: 'google_id', type: 'varchar', length: 255, nullable: true, unique: true })
+  googleId?: string;
+
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
 
@@ -47,6 +50,7 @@ export class User extends BaseEntity {
   refreshTokens: RefreshToken[];
 
   async validatePassword(password: string): Promise<boolean> {
+    if (!this.passwordHash) return false;
     return bcrypt.compare(password, this.passwordHash);
   }
 

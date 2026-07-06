@@ -23,6 +23,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -102,6 +103,23 @@ export class AuthController {
   async getMe(@CurrentUser() user: User) {
     const profile = await this.authService.getMe(user.id);
     return ok(profile);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Google Social Login                                                 */
+  /* ------------------------------------------------------------------ */
+
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in / sign up with a Google idToken' })
+  @ApiResponse({ status: 200, description: 'Google login successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  async googleLogin(@Body() body: GoogleLoginDto, @Req() req: Request) {
+    const ipAddress = req.ip ?? req.socket?.remoteAddress;
+    const deviceInfo = String(req.headers['user-agent'] ?? '');
+    const result = await this.authService.googleLogin(body.idToken, deviceInfo, ipAddress);
+    return ok(result, 'Google login successful');
   }
 
   /* ------------------------------------------------------------------ */

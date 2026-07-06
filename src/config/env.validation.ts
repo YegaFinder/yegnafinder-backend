@@ -63,6 +63,24 @@ class EnvironmentVariables {
 
   @IsNumber()
   OTP_LENGTH: number;
+
+  @IsString()
+  GOOGLE_CLIENT_ID: string;
+
+  @IsString()
+  SMTP_HOST: string;
+
+  @IsNumber()
+  SMTP_PORT: number;
+
+  @IsString()
+  SMTP_USER: string;
+
+  @IsString()
+  SMTP_PASS: string;
+
+  @IsString()
+  SMTP_FROM: string;
 }
 
 export function validate(config: Record<string, unknown>) {
