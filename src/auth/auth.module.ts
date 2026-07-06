@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './services/auth.service';
 import { OtpService } from './services/otp.service';
 import { TokenService } from './services/token.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import { SessionCacheService } from './services/session-cache.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -34,7 +35,14 @@ import { RefreshToken } from './entities/refresh-token.entity';
     TypeOrmModule.forFeature([RefreshToken]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, TokenService, SessionCacheService, JwtStrategy],
-  exports: [TokenService],
+  providers: [
+    AuthService,
+    OtpService,
+    TokenService,
+    RefreshTokenService,
+    SessionCacheService,
+    JwtStrategy,
+  ],
+  exports: [TokenService, RefreshTokenService],
 })
 export class AuthModule {}
