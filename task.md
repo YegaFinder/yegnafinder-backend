@@ -11,8 +11,9 @@
 - [x] Implement `AuthService.login()` with credential + verification checks
 - [x] Add `POST /auth/login` endpoint with Swagger docs
 - [x] Register `SessionCacheService` in `AuthModule`
-- [ ] Verify build passes
-- [ ] Create PR into `develop`
+- [x] Verify build passes
+- [x] Push branch to remote (`origin/feature/login`)
+- [ ] Create PR into `develop` — [open PR on GitHub](https://github.com/YegaFinder/yegnafinder-backend/pull/new/feature/login) (`gh` CLI not available locally)
 
 ## PR 2: JWT Auth (`feature/jwt-auth` → `develop`)
 
