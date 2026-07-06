@@ -17,6 +17,10 @@ class EnvironmentVariables {
   PORT: number;
 
   @IsString()
+  @IsOptional()
+  FRONTEND_ORIGIN: string;
+
+  @IsString()
   DB_HOST: string;
 
   @IsNumber()
