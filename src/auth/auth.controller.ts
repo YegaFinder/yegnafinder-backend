@@ -1,11 +1,21 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { AuthService } from './services/auth.service';
-import { RegisterDto } from '../dto/register.dto';
-import { VerifyOtpDto } from '../dto/verify-otp.dto';
-import { RequestPasswordResetDto } from '../dto/request-password-reset.dto';
-import { ResetPasswordDto } from '../dto/reset-password.dto';
-import { Public } from '../../common/decorators/public.decorator';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -20,6 +30,20 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto) {
     await this.authService.register(registerDto);
     return { message: 'Registration successful. Please check your email for the OTP.' };
+  }
+
+  @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 403, description: 'Email not verified' })
+  @ApiResponse({ status: 429, description: 'Too many login attempts' })
+  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+    const ipAddress = req.ip || req.socket.remoteAddress;
+    const deviceInfo = req.headers['user-agent'];
+    return this.authService.login(loginDto, deviceInfo, ipAddress);
   }
 
   @Public()

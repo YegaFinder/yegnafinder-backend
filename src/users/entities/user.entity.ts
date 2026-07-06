@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { UserRole } from '../enums/user-role.enum';
+import { RefreshToken } from '../../auth/entities/refresh-token.entity';
 import * as bcrypt from 'bcrypt';
-// Note: RefreshToken relation can be added later when the Auth module is complete
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -42,6 +42,9 @@ export class User extends BaseEntity {
 
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens: RefreshToken[];
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.passwordHash);
