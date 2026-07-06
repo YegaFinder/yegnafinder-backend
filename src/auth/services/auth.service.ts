@@ -4,6 +4,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../../users/users.service';
 import { OtpService } from './otp.service';
 import { TokenService } from './token.service';
@@ -20,13 +22,20 @@ import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
+  private readonly googleClient: OAuth2Client;
+
   constructor(
     private usersService: UsersService,
     private otpService: OtpService,
     private tokenService: TokenService,
     private refreshTokenService: RefreshTokenService,
     private sessionCacheService: SessionCacheService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client(
+      this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+    );
+  }
 
   async register(registerDto: RegisterDto): Promise<void> {
     const user = await this.usersService.create(registerDto);
@@ -132,5 +141,41 @@ export class AuthService {
   async getMe(userId: string): Promise<UserResponseDto> {
     const user = await this.usersService.findById(userId);
     return new UserResponseDto(user);
+  }
+
+  /**
+   * Verify a Google idToken (issued by the frontend SDK / mobile app) and
+   * either log in the existing user or auto-register a new Customer account.
+   * No password is required — Google has already authenticated the user.
+   */
+  async googleLogin(
+    idToken: string,
+    deviceInfo?: string,
+    ipAddress?: string,
+  ): Promise<AuthResponseDto> {
+    let ticket;
+    try {
+      ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload?.email) {
+      throw new UnauthorizedException('Google token did not contain an email address');
+    }
+
+    const user = await this.usersService.findOrCreateGoogleUser({
+      googleId: payload.sub,
+      email: payload.email,
+      firstName: payload.given_name ?? payload.email.split('@')[0],
+      lastName: payload.family_name ?? '',
+    });
+
+    await this.usersService.updateLastLogin(user.id);
+    return this.tokenService.issueTokenPair(user, deviceInfo, ipAddress);
   }
 }

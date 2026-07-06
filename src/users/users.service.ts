@@ -64,4 +64,43 @@ export class UsersService {
   async updateLastLogin(id: string): Promise<void> {
     await this.usersRepository.update(id, { lastLoginAt: new Date() });
   }
+
+  /**
+   * Find an existing user by Google ID or email, or create a new one if they've
+   * never logged in via Google before. Marks the account as email-verified since
+   * Google has already validated the address.
+   */
+  async findOrCreateGoogleUser(opts: {
+    googleId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<User> {
+    // 1. Already linked to Google — fast path
+    const byGoogleId = await this.usersRepository.findOne({
+      where: { googleId: opts.googleId },
+    });
+    if (byGoogleId) return byGoogleId;
+
+    // 2. Existing email account — link it
+    const byEmail = await this.findByEmail(opts.email);
+    if (byEmail) {
+      await this.usersRepository.update(byEmail.id, {
+        googleId: opts.googleId,
+        isEmailVerified: true,
+      });
+      return { ...byEmail, googleId: opts.googleId, isEmailVerified: true } as User;
+    }
+
+    // 3. Brand-new user — register without a password
+    const user = this.usersRepository.create({
+      firstName: opts.firstName,
+      lastName: opts.lastName,
+      email: opts.email,
+      googleId: opts.googleId,
+      role: UserRole.CUSTOMER,
+      isEmailVerified: true, // Google already verified the email
+    });
+    return this.usersRepository.save(user);
+  }
 }
