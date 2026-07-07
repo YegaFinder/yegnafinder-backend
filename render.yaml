@@ -48,7 +48,16 @@ services:
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
-      # ⚠️ TODO: Add your Google OAuth and SMTP variables via the Render dashboard later
+      - key: JWT_EXPIRES_IN
+        value: "15m"
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: "7d"
+      - key: OTP_EXPIRY_SECONDS
+        value: "300"
+      - key: OTP_LENGTH
+        value: "6"
+      - key: SMTP_PORT
+        value: "587"
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: SMTP_HOST
