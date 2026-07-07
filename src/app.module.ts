@@ -29,6 +29,8 @@ import { validate } from './config/env.validation';
           host: config.get<string>('SMTP_HOST', 'localhost'),
           port: config.get<number>('SMTP_PORT', 587),
           secure: config.get<number>('SMTP_PORT', 587) === 465,
+          // Force IPv4 — Railway does not support outbound IPv6
+          family: 4,
           auth: {
             user: config.get<string>('SMTP_USER', ''),
             pass: config.get<string>('SMTP_PASS', ''),
