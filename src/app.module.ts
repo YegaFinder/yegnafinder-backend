@@ -26,16 +26,16 @@ import { validate } from './config/env.validation';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         transport: {
-          host: config.getOrThrow<string>('SMTP_HOST'),
-          port: config.getOrThrow<number>('SMTP_PORT'),
-          secure: config.getOrThrow<number>('SMTP_PORT') === 465,
+          host: config.get<string>('SMTP_HOST', 'localhost'),
+          port: config.get<number>('SMTP_PORT', 587),
+          secure: config.get<number>('SMTP_PORT', 587) === 465,
           auth: {
-            user: config.getOrThrow<string>('SMTP_USER'),
-            pass: config.getOrThrow<string>('SMTP_PASS'),
+            user: config.get<string>('SMTP_USER', ''),
+            pass: config.get<string>('SMTP_PASS', ''),
           },
         },
         defaults: {
-          from: config.getOrThrow<string>('SMTP_FROM'),
+          from: config.get<string>('SMTP_FROM', 'no-reply@yegnafinder.com'),
         },
       }),
     }),
