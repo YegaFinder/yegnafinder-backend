@@ -12,7 +12,6 @@ export const databaseConfig: TypeOrmModuleAsyncOptions = {
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
     autoLoadEntities: true,
-    // Note: synchronize: true should not be used in production - otherwise you can lose production data.
-    synchronize: configService.get<string>('NODE_ENV') !== 'production',
+    synchronize: configService.get<string>('DB_SYNCHRONIZE') !== 'false',
   }),
 };
