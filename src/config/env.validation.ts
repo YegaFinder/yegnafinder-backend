@@ -63,10 +63,6 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  RESEND_TESTING_EMAIL: string;
-
-  @IsString()
-  @IsOptional()
   SMTP_FROM: string;
 }
 
