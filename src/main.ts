@@ -18,19 +18,26 @@ async function bootstrap() {
     }),
   );
 
-  // Build allowed origins: always include the production Vercel frontend,
-  // plus any extra origins supplied via FRONTEND_ORIGIN env var.
-  const defaultOrigins = [
-    'https://yega-finder-frontend.vercel.app',
-    'http://localhost:3000',
-  ];
+  // Allow all yega-finder-frontend Vercel deployments (production + previews)
+  // plus any extra origins from FRONTEND_ORIGIN env var.
   const extraOrigins = process.env.FRONTEND_ORIGIN
     ? process.env.FRONTEND_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
     : [];
-  const allowedOrigins = [...new Set([...defaultOrigins, ...extraOrigins])];
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Swagger UI)
+      if (!origin) return callback(null, true);
+      // Allow localhost dev
+      if (origin.startsWith('http://localhost')) return callback(null, true);
+      // Allow all yega-finder-frontend Vercel deployments
+      if (/^https:\/\/yega-finder-frontend(-[a-z0-9]+)?\.vercel\.app$/.test(origin)) {
+        return callback(null, true);
+      }
+      // Allow any extra origins configured via env var
+      if (extraOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
