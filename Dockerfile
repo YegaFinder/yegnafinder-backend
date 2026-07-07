@@ -3,8 +3,6 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-
 # Install dependencies first (layer-cached when package.json doesn't change)
 COPY package*.json ./
 RUN npm ci
@@ -25,6 +23,8 @@ LABEL org.opencontainers.image.vendor="Phoenixopia Solution PLC"
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 # Create a non-root user for security
 RUN addgroup --system --gid 1001 nestjs \
  && adduser  --system --uid 1001 nestjs
@@ -43,3 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD wget -qO- http://localhost:${PORT:-8000}/api/v1 || exit 1
 
 CMD ["node", "dist/main"]
+
