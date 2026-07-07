@@ -7,8 +7,13 @@ export const redisConfig: CacheModuleAsyncOptions = {
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => {
+    // Railway exposes Redis as REDIS_URL, REDIS_PRIVATE_URL, or REDIS_PUBLIC_URL
+    const redisUrl =
+      configService.get<string>('REDIS_URL') ||
+      configService.get<string>('REDIS_PRIVATE_URL') ||
+      configService.get<string>('REDIS_PUBLIC_URL');
     const store = await redisStore({
-      url: configService.get<string>('REDIS_URL'),
+      url: redisUrl,
     });
     return {
       store: store as unknown as string,

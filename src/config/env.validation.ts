@@ -24,7 +24,16 @@ class EnvironmentVariables {
   DATABASE_URL: string;
 
   @IsString()
+  @IsOptional()
   REDIS_URL: string;
+
+  @IsString()
+  @IsOptional()
+  REDIS_PRIVATE_URL: string;
+
+  @IsString()
+  @IsOptional()
+  REDIS_PUBLIC_URL: string;
 
   @IsString()
   JWT_SECRET: string;
