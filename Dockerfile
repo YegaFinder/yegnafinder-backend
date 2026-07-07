@@ -3,9 +3,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-# Install dependencies first (layer-cached when package.json doesn't change)
+# Install ALL dependencies (including devDependencies like @nestjs/cli needed for build)
 COPY package*.json ./
 RUN npm ci
 
@@ -14,6 +12,7 @@ COPY . .
 RUN npm run build
 
 # Prune devDependencies to keep the final image lean
+ENV NODE_ENV=production
 RUN npm prune --omit=dev
 
 # ─── Stage 2: Production Runtime ────────────────────────────────────────────
