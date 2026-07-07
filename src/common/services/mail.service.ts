@@ -13,7 +13,7 @@ export class MailService {
     this.resend = new Resend(apiKey);
     this.from =
       this.configService.get<string>('SMTP_FROM') ||
-      'YegnaFinder <onboarding@resend.dev>';
+      'YegnaFinder <lydiaabegaz@gmail.com>';
   }
 
   async sendMail(opts: {
