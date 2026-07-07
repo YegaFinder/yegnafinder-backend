@@ -3,6 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 # Install dependencies first (layer-cached when package.json doesn't change)
 COPY package*.json ./
 RUN npm ci
@@ -12,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # Prune devDependencies to keep the final image lean
-RUN npm prune --production
+RUN npm prune --omit=dev
 
 # ─── Stage 2: Production Runtime ────────────────────────────────────────────
 FROM node:20-alpine AS runner
