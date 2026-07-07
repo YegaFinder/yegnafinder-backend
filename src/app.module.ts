@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
-import { MailerModule } from '@nestjs-modules/mailer';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -22,32 +21,6 @@ import { validate } from './config/env.validation';
     }),
     TypeOrmModule.forRootAsync(databaseConfig),
     CacheModule.registerAsync(redisConfig),
-    MailerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        transport: {
-          host: config.get<string>('SMTP_HOST', 'localhost'),
-          port: config.get<number>('SMTP_PORT', 587),
-          secure: config.get<number>('SMTP_PORT', 587) === 465,
-          // Force IPv4 — Railway does not support outbound IPv6
-          family: 4,
-          // Reuse SMTP connections instead of creating a new one per email
-          pool: true,
-          maxConnections: 3,
-          maxMessages: 100,
-          auth: {
-            user: config.get<string>('SMTP_USER', ''),
-            pass: config.get<string>('SMTP_PASS', ''),
-          },
-          tls: {
-            rejectUnauthorized: false,
-          },
-        },
-        defaults: {
-          from: config.get<string>('SMTP_FROM', 'no-reply@yegnafinder.com'),
-        },
-      }),
-    }),
     CommonModule,
     AuthModule,
     UsersModule,

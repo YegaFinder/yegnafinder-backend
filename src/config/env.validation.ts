@@ -59,19 +59,7 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  SMTP_HOST: string;
-
-  @IsNumber()
-  @IsOptional()
-  SMTP_PORT: number;
-
-  @IsString()
-  @IsOptional()
-  SMTP_USER: string;
-
-  @IsString()
-  @IsOptional()
-  SMTP_PASS: string;
+  RESEND_API_KEY: string;
 
   @IsString()
   @IsOptional()

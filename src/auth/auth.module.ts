@@ -12,6 +12,7 @@ import { TokenService } from './services/token.service';
 import { RefreshTokenService } from './services/refresh-token.service';
 import { SessionCacheService } from './services/session-cache.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { MailService } from '../common/services/mail.service';
 
 import { UsersModule } from '../users/users.module';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -42,6 +43,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
     RefreshTokenService,
     SessionCacheService,
     JwtStrategy,
+    MailService,
   ],
   exports: [TokenService, RefreshTokenService],
 })
