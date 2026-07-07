@@ -8,6 +8,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Copy source and compile TypeScript
+# cache-bust: resend migration 2026-07-07
 COPY . .
 RUN npm run build
 
