@@ -79,11 +79,10 @@ export class OtpService {
     const html = this.buildOtpEmailHtml({ title, bodyText, otp, expiryMinutes });
 
     try {
-      await this.mailerService.sendMail({ to: email, subject, html });
+      // Fire and forget — don't await so the API responds immediately.
+      // The OTP is already stored in Redis; the email is best-effort.
+      void this.mailerService.sendMail({ to: email, subject, html });
     } catch (err) {
-      // Log failure but do NOT expose SMTP errors to the client.
-      // The OTP is already stored in Redis; if email fails the user can
-      // request a new one.
       console.error(`[OtpService] Failed to send ${type} OTP email to ${email}:`, err);
     }
   }

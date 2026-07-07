@@ -31,9 +31,16 @@ import { validate } from './config/env.validation';
           secure: config.get<number>('SMTP_PORT', 587) === 465,
           // Force IPv4 — Railway does not support outbound IPv6
           family: 4,
+          // Reuse SMTP connections instead of creating a new one per email
+          pool: true,
+          maxConnections: 3,
+          maxMessages: 100,
           auth: {
             user: config.get<string>('SMTP_USER', ''),
             pass: config.get<string>('SMTP_PASS', ''),
+          },
+          tls: {
+            rejectUnauthorized: false,
           },
         },
         defaults: {
