@@ -170,6 +170,22 @@ export class AuthController {
   }
 
   /* ------------------------------------------------------------------ */
+  /*  Resend verification OTP                                             */
+  /* ------------------------------------------------------------------ */
+
+  @Public()
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend email verification OTP' })
+  @ApiResponse({ status: 200, description: 'OTP sent to email.' })
+  @ApiResponse({ status: 403, description: 'Email is already verified' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async resendVerification(@Body() requestDto: RequestPasswordResetDto) {
+    await this.authService.resendVerificationOtp(requestDto.email);
+    return ok(null, 'Verification code resent successfully.');
+  }
+
+  /* ------------------------------------------------------------------ */
   /*  Forgot password (alias: /auth/forgot-password)                     */
   /* ------------------------------------------------------------------ */
 

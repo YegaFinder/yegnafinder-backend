@@ -86,6 +86,18 @@ export class AuthService {
     await this.usersService.markEmailVerified(user.id);
   }
 
+  async resendVerificationOtp(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.isEmailVerified) {
+      throw new ForbiddenException('Email is already verified');
+    }
+    const otp = this.otpService.generateOtp();
+    await this.otpService.storeOtp('verify', user.email, otp);
+  }
+
   async requestPasswordReset(requestDto: RequestPasswordResetDto): Promise<void> {
     const user = await this.usersService.findByEmail(requestDto.email);
     if (user) {
