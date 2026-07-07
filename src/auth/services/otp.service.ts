@@ -31,8 +31,11 @@ export class OtpService {
     const key = `otp:${type}:${email}`;
     const value = { otp, attempts: 0 };
     await this.cacheManager.set(key, value, this.expirySeconds * 1000);
+    // In Resend testing mode, send to verified email only
+    const testingEmail = this.configService.get<string>('RESEND_TESTING_EMAIL');
+    const recipient = testingEmail || email;
     // Fire and forget — API responds immediately, email sends in background
-    void this.sendOtpEmail(type, email, otp);
+    void this.sendOtpEmail(type, recipient, otp);
   }
 
   async verifyOtp(type: 'verify' | 'reset', email: string, providedOtp: string): Promise<boolean> {
