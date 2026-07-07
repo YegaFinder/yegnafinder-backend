@@ -4,6 +4,6 @@
     "builder": "DOCKERFILE"
   },
   "deploy": {
-    "startCommand": "node dist/main.js"
+    "startCommand": "node dist/main"
   }
 }
