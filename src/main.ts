@@ -18,13 +18,19 @@ async function bootstrap() {
     }),
   );
 
+  // Build allowed origins: always include the production Vercel frontend,
+  // plus any extra origins supplied via FRONTEND_ORIGIN env var.
+  const defaultOrigins = [
+    'https://yega-finder-frontend.vercel.app',
+    'http://localhost:3000',
+  ];
+  const extraOrigins = process.env.FRONTEND_ORIGIN
+    ? process.env.FRONTEND_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+    : [];
+  const allowedOrigins = [...new Set([...defaultOrigins, ...extraOrigins])];
+
   app.enableCors({
-    // Allow the Next.js dev server and any configured production PWA origin.
-    // NEXT_PUBLIC_API_URL in the frontend points to localhost:8000, and the
-    // frontend itself runs on localhost:3000 by default.
-    origin: process.env.FRONTEND_ORIGIN
-      ? process.env.FRONTEND_ORIGIN.split(',')
-      : ['http://localhost:3000'],
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
