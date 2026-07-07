@@ -33,7 +33,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {
     this.googleClient = new OAuth2Client(
-      this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+      this.configService.get<string>('GOOGLE_CLIENT_ID', ''),
     );
   }
 
