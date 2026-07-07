@@ -1,0 +1,71 @@
+services:
+  - type: web
+    name: yegnafinder-api
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_ORIGIN
+        value: "https://your-vercel-domain.vercel.app" # ⚠️ TODO: Replace with your actual Vercel URL
+      - key: DB_HOST
+        fromDatabase:
+          name: yf-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: yf-postgres
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: yf-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: yf-postgres
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: yf-postgres
+          property: database
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: yf-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: yf-redis
+          property: port
+      - key: REDIS_PASSWORD
+        value: ""
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # ⚠️ TODO: Add your Google OAuth and SMTP variables via the Render dashboard later
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+  - type: redis
+    name: yf-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: [] # internal access only by default
+
+databases:
+  - name: yf-postgres
+    plan: free
