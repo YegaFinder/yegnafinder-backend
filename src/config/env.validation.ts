@@ -21,30 +21,10 @@ class EnvironmentVariables {
   FRONTEND_ORIGIN: string;
 
   @IsString()
-  DB_HOST: string;
-
-  @IsNumber()
-  DB_PORT: number;
+  DATABASE_URL: string;
 
   @IsString()
-  DB_USERNAME: string;
-
-  @IsString()
-  @IsOptional()
-  DB_PASSWORD: string;
-
-  @IsString()
-  DB_NAME: string;
-
-  @IsString()
-  REDIS_HOST: string;
-
-  @IsNumber()
-  REDIS_PORT: number;
-
-  @IsString()
-  @IsOptional()
-  REDIS_PASSWORD: string;
+  REDIS_URL: string;
 
   @IsString()
   JWT_SECRET: string;

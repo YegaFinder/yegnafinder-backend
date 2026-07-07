@@ -8,9 +8,7 @@ export const redisConfig: CacheModuleAsyncOptions = {
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => {
     const store = await redisStore({
-      host: configService.get<string>('REDIS_HOST'),
-      port: configService.get<number>('REDIS_PORT'),
-      password: configService.get<string>('REDIS_PASSWORD') || undefined,
+      url: configService.get<string>('REDIS_URL'),
     });
     return {
       store: store as unknown as string,
