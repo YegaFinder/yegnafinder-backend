@@ -48,10 +48,10 @@ export class TokenService {
     oldToken: string,
     deviceInfo?: string,
     ipAddress?: string,
-  ): Promise<string> {
+  ): Promise<AuthResponseDto> {
     const existing = await this.refreshTokenService.validate(oldToken);
     await this.refreshTokenService.revoke(oldToken);
-    return this.refreshTokenService.create(
+    return this.issueTokenPair(
       existing.user,
       deviceInfo,
       ipAddress,

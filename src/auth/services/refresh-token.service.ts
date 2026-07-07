@@ -79,7 +79,7 @@ export class RefreshTokenService {
     // Fetch all active token hashes before revoking, so we can clear Redis
     const activeTokens = await this.refreshTokenRepository.find({
       where: { user: { id: userId } as User, isRevoked: false },
-      select: ['tokenHash'],
+      select: { tokenHash: true },
     });
 
     // Mark all as revoked in PostgreSQL
