@@ -11,10 +11,11 @@ export class MailService {
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY', '');
     this.resend = new Resend(apiKey);
-    this.from =
-      this.configService.get<string>('SMTP_FROM') ||
-      'noreply@yegnafinder.resend.dev';
-    this.logger.log(`[MailService] Initialized with from: ${this.from}`);
+    const smtpFrom = this.configService.get<string>('SMTP_FROM');
+    this.from = smtpFrom || 'onboarding@resend.dev';
+    this.logger.log(`[MailService] SMTP_FROM env value: "${smtpFrom}"`);
+    this.logger.log(`[MailService] Using from: ${this.from}`);
+    this.logger.log(`[MailService] API Key configured: ${!!apiKey}`);
   }
 
   async sendMail(opts: {
