@@ -13,9 +13,9 @@ export class MailService {
     this.resend = new Resend(apiKey);
     const smtpFrom = this.configService.get<string>('SMTP_FROM');
     // Clean up the value: remove quotes and trim whitespace
-    const cleanedFrom = smtpFrom?.trim().replace(/^["']|["']$/g, '');
+    const cleanedFrom = smtpFrom?.trim().replace(/^["']|["']$/g, '') || '';
     // Validate email format - if invalid, use onboarding domain
-    const isValidEmail = cleanedFrom?.includes('@') && cleanedFrom?.includes('.');
+    const isValidEmail = cleanedFrom.includes('@') && cleanedFrom.includes('.');
     this.from = isValidEmail ? cleanedFrom : 'onboarding@resend.dev';
     this.logger.log(`[MailService] SMTP_FROM env value: "${smtpFrom}"`);
     this.logger.log(`[MailService] Cleaned from: ${cleanedFrom}`);
