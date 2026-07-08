@@ -12,9 +12,11 @@ export class MailService {
     const apiKey = this.configService.get<string>('RESEND_API_KEY', '');
     this.resend = new Resend(apiKey);
     const smtpFrom = this.configService.get<string>('SMTP_FROM');
-    this.from = smtpFrom || 'onboarding@resend.dev';
+    // Clean up the value: remove quotes and trim whitespace
+    const cleanedFrom = smtpFrom?.trim().replace(/^["']|["']$/g, '');
+    this.from = cleanedFrom || 'onboarding@resend.dev';
     this.logger.log(`[MailService] SMTP_FROM env value: "${smtpFrom}"`);
-    this.logger.log(`[MailService] Using from: ${this.from}`);
+    this.logger.log(`[MailService] Cleaned from: ${this.from}`);
     this.logger.log(`[MailService] API Key configured: ${!!apiKey}`);
   }
 
