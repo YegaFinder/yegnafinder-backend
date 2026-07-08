@@ -14,6 +14,7 @@ export class MailService {
     this.from =
       this.configService.get<string>('SMTP_FROM') ||
       'noreply@yegnafinder.resend.dev';
+    this.logger.log(`[MailService] Initialized with from: ${this.from}`);
   }
 
   async sendMail(opts: {
