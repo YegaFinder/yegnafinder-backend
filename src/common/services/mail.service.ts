@@ -14,9 +14,13 @@ export class MailService {
     const smtpFrom = this.configService.get<string>('SMTP_FROM');
     // Clean up the value: remove quotes and trim whitespace
     const cleanedFrom = smtpFrom?.trim().replace(/^["']|["']$/g, '');
-    this.from = cleanedFrom || 'onboarding@resend.dev';
+    // Validate email format - if invalid, use onboarding domain
+    const isValidEmail = cleanedFrom?.includes('@') && cleanedFrom?.includes('.');
+    this.from = isValidEmail ? cleanedFrom : 'onboarding@resend.dev';
     this.logger.log(`[MailService] SMTP_FROM env value: "${smtpFrom}"`);
-    this.logger.log(`[MailService] Cleaned from: ${this.from}`);
+    this.logger.log(`[MailService] Cleaned from: ${cleanedFrom}`);
+    this.logger.log(`[MailService] Is valid email: ${isValidEmail}`);
+    this.logger.log(`[MailService] Using from: ${this.from}`);
     this.logger.log(`[MailService] API Key configured: ${!!apiKey}`);
   }
 
