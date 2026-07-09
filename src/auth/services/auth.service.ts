@@ -37,10 +37,10 @@ export class AuthService {
     );
   }
 
-  async register(registerDto: RegisterDto): Promise<void> {
+  async register(registerDto: RegisterDto): Promise<string | null> {
     const user = await this.usersService.create(registerDto);
     const otp = this.otpService.generateOtp();
-    await this.otpService.storeOtp('verify', user.email, otp);
+    return await this.otpService.storeOtp('verify', user.email, otp);
   }
 
   async login(
@@ -86,7 +86,7 @@ export class AuthService {
     await this.usersService.markEmailVerified(user.id);
   }
 
-  async resendVerificationOtp(email: string): Promise<void> {
+  async resendVerificationOtp(email: string): Promise<string | null> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -95,15 +95,16 @@ export class AuthService {
       throw new ForbiddenException('Email is already verified');
     }
     const otp = this.otpService.generateOtp();
-    await this.otpService.storeOtp('verify', user.email, otp);
+    return await this.otpService.storeOtp('verify', user.email, otp);
   }
 
-  async requestPasswordReset(requestDto: RequestPasswordResetDto): Promise<void> {
+  async requestPasswordReset(requestDto: RequestPasswordResetDto): Promise<string | null> {
     const user = await this.usersService.findByEmail(requestDto.email);
     if (user) {
       const otp = this.otpService.generateOtp();
-      await this.otpService.storeOtp('reset', user.email, otp);
+      return await this.otpService.storeOtp('reset', user.email, otp);
     }
+    return null;
   }
 
   async resetPassword(resetDto: ResetPasswordDto): Promise<void> {

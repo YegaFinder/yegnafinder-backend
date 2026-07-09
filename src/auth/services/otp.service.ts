@@ -11,6 +11,7 @@ export class OtpService {
   private readonly expirySeconds: number;
   private readonly otpLength: number;
   private readonly MAX_ATTEMPTS = 5;
+  private readonly isTestMode: boolean;
 
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -19,6 +20,7 @@ export class OtpService {
   ) {
     this.expirySeconds = this.configService.get<number>('OTP_EXPIRY_SECONDS', 300);
     this.otpLength = this.configService.get<number>('OTP_LENGTH', 6);
+    this.isTestMode = this.configService.get<string>('TEST_MODE', 'false') === 'true';
   }
 
   generateOtp(): string {
@@ -27,12 +29,14 @@ export class OtpService {
     return crypto.randomInt(min, max).toString();
   }
 
-  async storeOtp(type: 'verify' | 'reset', email: string, otp: string): Promise<void> {
+  async storeOtp(type: 'verify' | 'reset', email: string, otp: string): Promise<string | null> {
     const key = `otp:${type}:${email}`;
     const value = { otp, attempts: 0 };
     await this.cacheManager.set(key, value, this.expirySeconds * 1000);
     // Fire and forget — API responds immediately, email sends in background
     void this.sendOtpEmail(type, email, otp);
+    // Return OTP in test mode for frontend display
+    return this.isTestMode ? otp : null;
   }
 
   async verifyOtp(type: 'verify' | 'reset', email: string, providedOtp: string): Promise<boolean> {

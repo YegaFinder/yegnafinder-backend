@@ -49,7 +49,10 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User registered — OTP sent to email.' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   async register(@Body() registerDto: RegisterDto) {
-    await this.authService.register(registerDto);
+    const otp = await this.authService.register(registerDto);
+    if (otp) {
+      return ok({ otp, message: 'TEST MODE: OTP displayed for simulation' }, 'Registration successful. For simulation, enter code: ' + otp);
+    }
     return ok(null, 'Registration successful. Please check your email for the OTP.');
   }
 
@@ -181,7 +184,10 @@ export class AuthController {
   @ApiResponse({ status: 403, description: 'Email is already verified' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async resendVerification(@Body() requestDto: RequestPasswordResetDto) {
-    await this.authService.resendVerificationOtp(requestDto.email);
+    const otp = await this.authService.resendVerificationOtp(requestDto.email);
+    if (otp) {
+      return ok({ otp, message: 'TEST MODE: OTP displayed for simulation' }, 'Verification code resent. For simulation, enter code: ' + otp);
+    }
     return ok(null, 'Verification code resent successfully.');
   }
 
@@ -195,7 +201,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Request password reset OTP (forgot-password)' })
   @ApiResponse({ status: 200, description: 'If the email exists, an OTP has been sent.' })
   async forgotPassword(@Body() requestDto: RequestPasswordResetDto) {
-    await this.authService.requestPasswordReset(requestDto);
+    const otp = await this.authService.requestPasswordReset(requestDto);
+    if (otp) {
+      return ok(
+        { otp, message: 'TEST MODE: OTP displayed for simulation' },
+        'For simulation, enter code: ' + otp,
+      );
+    }
     return ok(
       { message: 'If the email is registered, a password reset OTP has been sent.' },
       'Request processed',
@@ -212,7 +224,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Request password reset OTP (legacy alias)' })
   @ApiResponse({ status: 200, description: 'If the email exists, an OTP has been sent.' })
   async requestPasswordReset(@Body() requestDto: RequestPasswordResetDto) {
-    await this.authService.requestPasswordReset(requestDto);
+    const otp = await this.authService.requestPasswordReset(requestDto);
+    if (otp) {
+      return ok(
+        { otp, message: 'TEST MODE: OTP displayed for simulation' },
+        'For simulation, enter code: ' + otp,
+      );
+    }
     return ok(
       { message: 'If the email is registered, a password reset OTP has been sent.' },
       'Request processed',
