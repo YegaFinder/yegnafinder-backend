@@ -6,6 +6,7 @@ import { User } from '../../users/entities/user.entity';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 import { AuthResponseDto } from '../dto/auth-response.dto';
 import { RefreshTokenService } from './refresh-token.service';
+import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class TokenService {
@@ -27,15 +28,20 @@ export class TokenService {
       ipAddress,
     );
 
-    return {
+    const userDto = new UserResponseDto(user);
+    return new AuthResponseDto({
       accessToken,
       refreshToken,
-      user: new UserResponseDto(user),
-    };
+      user: userDto,
+    });
   }
 
   async generateAccessToken(user: User): Promise<string> {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload: JwtPayload = { 
+      sub: user.id, 
+      email: user.email, 
+      role: user.role 
+    };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.getOrThrow<string>('JWT_SECRET'),
       expiresIn: this.configService.getOrThrow<string>(

@@ -10,6 +10,16 @@ export class AuthResponseDto {
 
   @ApiProperty({ type: UserResponseDto })
   user: UserResponseDto;
+
+  @ApiProperty({ description: 'User role for frontend routing' })
+  role: string;
+
+  constructor(data: { accessToken: string; refreshToken: string; user: UserResponseDto }) {
+    this.accessToken = data.accessToken;
+    this.refreshToken = data.refreshToken;
+    this.user = data.user;
+    this.role = data.user.role; // Extract role from user for easy access
+  }
 }
 
 /** Standard JSON envelope every endpoint returns. */
