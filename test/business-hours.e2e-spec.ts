@@ -1,4 +1,8 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ExecutionContext,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -41,9 +45,11 @@ describe('MerchantProfilesController business hours (e2e)', () => {
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        canActivate: (context) => {
-          const req = context.switchToHttp().getRequest();
-          req.user = { sub: 'merchant-123' };
+        canActivate: (context: ExecutionContext) => {
+          const req = context
+            .switchToHttp()
+            .getRequest<{ user: { id: string } }>();
+          req.user = { id: 'merchant-123' };
           return true;
         },
       })
@@ -71,7 +77,9 @@ describe('MerchantProfilesController business hours (e2e)', () => {
   });
 
   it('PUT /api/v1/profiles/merchant/business-hours updates business hours', async () => {
-    mockBusinessHoursService.updateBusinessHours.mockResolvedValue(businessHours);
+    mockBusinessHoursService.updateBusinessHours.mockResolvedValue(
+      businessHours,
+    );
 
     const response = await request(app.getHttpServer())
       .put('/api/v1/profiles/merchant/business-hours')
@@ -93,7 +101,9 @@ describe('MerchantProfilesController business hours (e2e)', () => {
       .expect(200);
 
     expect(response.body).toEqual({ businessHours });
-    expect(mockBusinessHoursService.getBusinessHours).toHaveBeenCalledWith(merchantProfile.id);
+    expect(mockBusinessHoursService.getBusinessHours).toHaveBeenCalledWith(
+      merchantProfile.id,
+    );
   });
 
   it('GET /api/v1/profiles/merchant/is-open returns open status', async () => {
@@ -104,7 +114,9 @@ describe('MerchantProfilesController business hours (e2e)', () => {
       .expect(200);
 
     expect(response.body).toEqual({ isOpen: true });
-    expect(mockBusinessHoursService.isOpenNow).toHaveBeenCalledWith(merchantProfile.id);
+    expect(mockBusinessHoursService.isOpenNow).toHaveBeenCalledWith(
+      merchantProfile.id,
+    );
   });
 
   it('PUT /api/v1/profiles/merchant/business-hours rejects invalid time format', async () => {

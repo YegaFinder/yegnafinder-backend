@@ -20,7 +20,12 @@ export class CustomerProfile extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   bio?: string;
 
-  @Column({ name: 'preferred_language', type: 'varchar', length: 10, default: 'en' })
+  @Column({
+    name: 'preferred_language',
+    type: 'varchar',
+    length: 10,
+    default: 'en',
+  })
   preferredLanguage: string;
 
   @Column({ name: 'notification_preferences', type: 'jsonb', default: {} })

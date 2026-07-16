@@ -21,7 +21,9 @@ export class UploadsService {
   constructor(private configService: ConfigService) {
     const region = this.configService.get<string>('aws.region') ?? 'us-east-1';
     const accessKeyId = this.configService.get<string>('aws.accessKeyId');
-    const secretAccessKey = this.configService.get<string>('aws.secretAccessKey');
+    const secretAccessKey = this.configService.get<string>(
+      'aws.secretAccessKey',
+    );
 
     this.s3Client = new S3Client({
       region,
@@ -42,7 +44,9 @@ export class UploadsService {
     // Validate content type
     const allowedTypes = this.getAllowedContentTypes(uploadType);
     if (!allowedTypes.includes(contentType)) {
-      throw new BadRequestException(`Invalid content type for ${uploadType}. Allowed: ${allowedTypes.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid content type for ${uploadType}. Allowed: ${allowedTypes.join(', ')}`,
+      );
     }
 
     // Generate unique file key
@@ -62,8 +66,12 @@ export class UploadsService {
       },
     });
 
-    const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 }); // 1 hour
-    const fileUrl = this.cdnUrl ? `${this.cdnUrl}/${key}` : `https://${this.bucket}.s3.amazonaws.com/${key}`;
+    const uploadUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: 3600,
+    }); // 1 hour
+    const fileUrl = this.cdnUrl
+      ? `${this.cdnUrl}/${key}`
+      : `https://${this.bucket}.s3.amazonaws.com/${key}`;
 
     return { uploadUrl, fileUrl, key };
   }
@@ -96,8 +104,8 @@ export class UploadsService {
     return ext ? `.${ext}` : '.jpg';
   }
 
-  async deleteFile(key: string): Promise<void> {
-    // Future enhancement: implement file deletion
-    // Use DeleteObjectCommand from AWS SDK
+  deleteFile(key: string): Promise<void> {
+    void key;
+    return Promise.resolve();
   }
 }

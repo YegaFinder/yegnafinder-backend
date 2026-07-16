@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OAuth2Client } from 'google-auth-library';
+import { LoginTicket, OAuth2Client, TokenPayload } from 'google-auth-library';
 import { UsersService } from '../../users/users.service';
 import { OtpService } from './otp.service';
 import { TokenService } from './token.service';
@@ -65,7 +65,9 @@ export class AuthService {
     }
 
     if (!user.isEmailVerified) {
-      throw new ForbiddenException('Email not verified. Please verify your email before logging in.');
+      throw new ForbiddenException(
+        'Email not verified. Please verify your email before logging in.',
+      );
     }
 
     await this.usersService.updateLastLogin(user.id);
@@ -98,7 +100,9 @@ export class AuthService {
     return await this.otpService.storeOtp('verify', user.email, otp);
   }
 
-  async requestPasswordReset(requestDto: RequestPasswordResetDto): Promise<string | null> {
+  async requestPasswordReset(
+    requestDto: RequestPasswordResetDto,
+  ): Promise<string | null> {
     const user = await this.usersService.findByEmail(requestDto.email);
     if (user) {
       const otp = this.otpService.generateOtp();
@@ -131,7 +135,11 @@ export class AuthService {
     deviceInfo?: string,
     ipAddress?: string,
   ): Promise<AuthResponseDto> {
-    return this.tokenService.rotateRefreshToken(refreshToken, deviceInfo, ipAddress);
+    return this.tokenService.rotateRefreshToken(
+      refreshToken,
+      deviceInfo,
+      ipAddress,
+    );
   }
 
   /**
@@ -166,7 +174,7 @@ export class AuthService {
     deviceInfo?: string,
     ipAddress?: string,
   ): Promise<AuthResponseDto> {
-    let ticket;
+    let ticket: LoginTicket;
     try {
       ticket = await this.googleClient.verifyIdToken({
         idToken,
@@ -176,9 +184,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Google token');
     }
 
-    const payload = ticket.getPayload();
-    if (!payload?.email) {
-      throw new UnauthorizedException('Google token did not contain an email address');
+    const payload: TokenPayload | undefined = ticket.getPayload();
+    if (!payload?.email || !payload.sub) {
+      throw new UnauthorizedException(
+        'Google token did not contain required claims',
+      );
     }
 
     const user = await this.usersService.findOrCreateGoogleUser({

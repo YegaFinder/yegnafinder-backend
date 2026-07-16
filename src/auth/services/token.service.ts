@@ -37,10 +37,10 @@ export class TokenService {
   }
 
   async generateAccessToken(user: User): Promise<string> {
-    const payload: JwtPayload = { 
-      sub: user.id, 
-      email: user.email, 
-      role: user.role 
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
     };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.getOrThrow<string>('JWT_SECRET'),
@@ -57,11 +57,7 @@ export class TokenService {
   ): Promise<AuthResponseDto> {
     const existing = await this.refreshTokenService.validate(oldToken);
     await this.refreshTokenService.revoke(oldToken);
-    return this.issueTokenPair(
-      existing.user,
-      deviceInfo,
-      ipAddress,
-    );
+    return this.issueTokenPair(existing.user, deviceInfo, ipAddress);
   }
 
   async revokeAllUserTokens(userId: string): Promise<void> {

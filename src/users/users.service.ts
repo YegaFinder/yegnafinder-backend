@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -21,7 +25,9 @@ export class UsersService {
     }
 
     if (phone) {
-      const existingPhone = await this.usersRepository.findOne({ where: { phone } });
+      const existingPhone = await this.usersRepository.findOne({
+        where: { phone },
+      });
       if (existingPhone) {
         throw new ConflictException('Phone number already registered');
       }
@@ -89,7 +95,11 @@ export class UsersService {
         googleId: opts.googleId,
         isEmailVerified: true,
       });
-      return { ...byEmail, googleId: opts.googleId, isEmailVerified: true } as User;
+      return {
+        ...byEmail,
+        googleId: opts.googleId,
+        isEmailVerified: true,
+      } as User;
     }
 
     // 3. Brand-new user — register without a password

@@ -11,7 +11,8 @@ export class PresignedUrlRequestDto {
   @ApiProperty({ example: 'image/jpeg' })
   @IsString()
   @Matches(/^(image\/(jpeg|png|webp)|application\/pdf)$/, {
-    message: 'Content type must be image/jpeg, image/png, image/webp, or application/pdf',
+    message:
+      'Content type must be image/jpeg, image/png, image/webp, or application/pdf',
   })
   contentType: string;
 
@@ -24,7 +25,9 @@ export class PresignedUrlResponseDto {
   @ApiProperty({ example: 'https://s3.amazonaws.com/bucket/presigned-url' })
   uploadUrl: string;
 
-  @ApiProperty({ example: 'https://cdn.example.com/uploads/avatars/user123/file.jpg' })
+  @ApiProperty({
+    example: 'https://cdn.example.com/uploads/avatars/user123/file.jpg',
+  })
   fileUrl: string;
 
   @ApiProperty({ example: 'uploads/avatars/user123/uuid-file.jpg' })

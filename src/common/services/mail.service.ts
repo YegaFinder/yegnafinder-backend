@@ -18,7 +18,8 @@ export class MailService {
     // Validate email format - if invalid, use onboarding domain
     const isValidEmail = cleanedFrom.includes('@') && cleanedFrom.includes('.');
     this.from = isValidEmail ? cleanedFrom : 'onboarding@resend.dev';
-    this.isTestMode = this.configService.get<string>('TEST_MODE', 'false') === 'true';
+    this.isTestMode =
+      this.configService.get<string>('TEST_MODE', 'false') === 'true';
     this.logger.log(`[MailService] SMTP_FROM env value: "${smtpFrom}"`);
     this.logger.log(`[MailService] Cleaned from: ${cleanedFrom}`);
     this.logger.log(`[MailService] Is valid email: ${isValidEmail}`);
@@ -49,7 +50,9 @@ export class MailService {
         html: opts.html,
       });
       if (error) {
-        this.logger.error(`Resend error sending to ${opts.to}: ${JSON.stringify(error)}`);
+        this.logger.error(
+          `Resend error sending to ${opts.to}: ${JSON.stringify(error)}`,
+        );
       }
     } catch (err) {
       this.logger.error(`Failed to send email to ${opts.to}: ${err}`);

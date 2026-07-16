@@ -21,17 +21,26 @@ async function bootstrap() {
   // Allow all yega-finder-frontend Vercel deployments (production + previews)
   // plus any extra origins from FRONTEND_ORIGIN env var.
   const extraOrigins = process.env.FRONTEND_ORIGIN
-    ? process.env.FRONTEND_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+    ? process.env.FRONTEND_ORIGIN.split(',')
+        .map((o) => o.trim())
+        .filter(Boolean)
     : [];
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       // Allow requests with no origin (mobile apps, curl, Swagger UI)
       if (!origin) return callback(null, true);
       // Allow localhost dev
       if (origin.startsWith('http://localhost')) return callback(null, true);
       // Allow all yega-finder-frontend Vercel deployments
-      if (/^https:\/\/yega-finder-frontend(-[a-z0-9]+)?\.vercel\.app$/.test(origin)) {
+      if (
+        /^https:\/\/yega-finder-frontend(-[a-z0-9]+)?\.vercel\.app$/.test(
+          origin,
+        )
+      ) {
         return callback(null, true);
       }
       // Allow any extra origins configured via env var
@@ -56,4 +65,7 @@ async function bootstrap() {
   console.log(`Application is running on: http://0.0.0.0:${port}/api/v1`);
   console.log(`Swagger docs available at: http://0.0.0.0:${port}/api/docs`);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

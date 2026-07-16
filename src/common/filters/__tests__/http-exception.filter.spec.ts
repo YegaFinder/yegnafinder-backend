@@ -26,14 +26,24 @@ describe('HttpExceptionFilter', () => {
     filter.catch(exception, host);
 
     expect(status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
-    expect(json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        statusCode: HttpStatus.BAD_REQUEST,
-        path: '/api/v1/uploads/presign',
-        method: 'POST',
-        message: 'Invalid input',
-        timestamp: expect.any(String),
-      }),
-    );
+    const calls = json.mock.calls as Array<
+      [
+        {
+          statusCode: number;
+          path: string;
+          method: string;
+          message: string;
+          timestamp: string;
+        },
+      ]
+    >;
+    const responseBody = calls[0][0];
+    expect(responseBody).toMatchObject({
+      statusCode: HttpStatus.BAD_REQUEST,
+      path: '/api/v1/uploads/presign',
+      method: 'POST',
+      message: 'Invalid input',
+    });
+    expect(responseBody.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 });

@@ -25,7 +25,10 @@ export const redisConfig: CacheModuleAsyncOptions = {
         host: parsed.hostname,
         port: Number(parsed.port) || 6379,
         password: parsed.password || undefined,
-        username: parsed.username && parsed.username !== 'default' ? parsed.username : undefined,
+        username:
+          parsed.username && parsed.username !== 'default'
+            ? parsed.username
+            : undefined,
         // Railway internal connections use plain TCP (no TLS)
         tls: parsed.protocol === 'rediss:' ? {} : undefined,
       };

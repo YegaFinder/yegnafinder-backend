@@ -1,9 +1,16 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ExecutionContext,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { UploadsController } from '../src/uploads/controllers/uploads.controller';
-import { UploadsService, UploadType } from '../src/uploads/services/uploads.service';
+import {
+  UploadsService,
+  UploadType,
+} from '../src/uploads/services/uploads.service';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
 
 describe('UploadsController (e2e)', () => {
@@ -20,9 +27,11 @@ describe('UploadsController (e2e)', () => {
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        canActivate: (context) => {
-          const req = context.switchToHttp().getRequest();
-          req.user = { sub: 'user-123' };
+        canActivate: (context: ExecutionContext) => {
+          const req = context
+            .switchToHttp()
+            .getRequest<{ user: { id: string } }>();
+          req.user = { id: 'user-123' };
           return true;
         },
       })

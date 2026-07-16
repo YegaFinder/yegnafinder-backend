@@ -1,8 +1,17 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { UploadsService } from '../services/uploads.service';
-import { PresignedUrlRequestDto, PresignedUrlResponseDto } from '../dto/presigned-url.dto';
+import {
+  PresignedUrlRequestDto,
+  PresignedUrlResponseDto,
+} from '../dto/presigned-url.dto';
 
 @ApiTags('Uploads')
 @ApiBearerAuth()
@@ -15,10 +24,10 @@ export class UploadsController {
   @ApiOperation({ summary: 'Generate presigned URL for file upload' })
   @ApiResponse({ status: 201, type: PresignedUrlResponseDto })
   async generatePresignedUrl(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body() dto: PresignedUrlRequestDto,
   ): Promise<PresignedUrlResponseDto> {
-    const userId = req.user.sub;
+    const userId = req.user.id;
     const result = await this.uploadsService.generatePresignedUrl(
       dto.filename,
       dto.contentType,

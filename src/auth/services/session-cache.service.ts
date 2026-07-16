@@ -35,10 +35,7 @@ export class SessionCacheService {
     await this.cacheManager.del(`session:${tokenHash}`);
   }
 
-  async checkLoginRateLimit(
-    ipAddress?: string,
-    email?: string,
-  ): Promise<void> {
+  async checkLoginRateLimit(ipAddress?: string, email?: string): Promise<void> {
     const keys = this.getLoginRateLimitKeys(ipAddress, email);
     for (const key of keys) {
       const attempts = await this.cacheManager.get<number>(key);
@@ -62,20 +59,14 @@ export class SessionCacheService {
     }
   }
 
-  async resetLoginRateLimit(
-    ipAddress?: string,
-    email?: string,
-  ): Promise<void> {
+  async resetLoginRateLimit(ipAddress?: string, email?: string): Promise<void> {
     const keys = this.getLoginRateLimitKeys(ipAddress, email);
     for (const key of keys) {
       await this.cacheManager.del(key);
     }
   }
 
-  private getLoginRateLimitKeys(
-    ipAddress?: string,
-    email?: string,
-  ): string[] {
+  private getLoginRateLimitKeys(ipAddress?: string, email?: string): string[] {
     const keys: string[] = [];
     if (ipAddress) {
       keys.push(`ratelimit:login:ip:${ipAddress}`);

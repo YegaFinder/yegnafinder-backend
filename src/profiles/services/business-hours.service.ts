@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BusinessHours, DayOfWeek } from '../entities/business-hours.entity';
@@ -14,7 +18,10 @@ export class BusinessHoursService {
     private merchantProfileRepository: Repository<MerchantProfile>,
   ) {}
 
-  async updateBusinessHours(merchantProfileId: string, hoursData: BusinessHoursDto[]): Promise<BusinessHours[]> {
+  async updateBusinessHours(
+    merchantProfileId: string,
+    hoursData: BusinessHoursDto[],
+  ): Promise<BusinessHours[]> {
     // Verify merchant profile exists
     const merchantProfile = await this.merchantProfileRepository.findOne({
       where: { id: merchantProfileId },
@@ -69,11 +76,14 @@ export class BusinessHoursService {
     }
 
     // Check if current time is within business hours
-    const isWithinHours = currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
-    
+    const isWithinHours =
+      currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
+
     // Check if not during break time (if break is defined)
     if (todayHours.breakStartTime && todayHours.breakEndTime) {
-      const isDuringBreak = currentTime >= todayHours.breakStartTime && currentTime <= todayHours.breakEndTime;
+      const isDuringBreak =
+        currentTime >= todayHours.breakStartTime &&
+        currentTime <= todayHours.breakEndTime;
       return isWithinHours && !isDuringBreak;
     }
 
@@ -82,12 +92,14 @@ export class BusinessHoursService {
 
   private validateBusinessHours(hoursData: BusinessHoursDto[]): void {
     // Ensure all days of the week are provided
-    const providedDays = hoursData.map(h => h.dayOfWeek);
+    const providedDays = hoursData.map((h) => h.dayOfWeek);
     const allDays = Object.values(DayOfWeek);
-    
+
     for (const day of allDays) {
       if (!providedDays.includes(day)) {
-        throw new BadRequestException(`Business hours for ${day} must be provided`);
+        throw new BadRequestException(
+          `Business hours for ${day} must be provided`,
+        );
       }
     }
 
@@ -105,27 +117,40 @@ export class BusinessHoursService {
 
       // If not closed and not 24 hours, openTime and closeTime are required
       if (!hours.openTime || !hours.closeTime) {
-        throw new BadRequestException(`Open and close times are required for ${hours.dayOfWeek}`);
+        throw new BadRequestException(
+          `Open and close times are required for ${hours.dayOfWeek}`,
+        );
       }
 
       // Validate that close time is after open time
       if (hours.openTime >= hours.closeTime) {
-        throw new BadRequestException(`Close time must be after open time for ${hours.dayOfWeek}`);
+        throw new BadRequestException(
+          `Close time must be after open time for ${hours.dayOfWeek}`,
+        );
       }
 
       // Validate break times if provided
       if (hours.breakStartTime || hours.breakEndTime) {
         if (!hours.breakStartTime || !hours.breakEndTime) {
-          throw new BadRequestException(`Both break start and end times must be provided for ${hours.dayOfWeek}`);
+          throw new BadRequestException(
+            `Both break start and end times must be provided for ${hours.dayOfWeek}`,
+          );
         }
 
         if (hours.breakStartTime >= hours.breakEndTime) {
-          throw new BadRequestException(`Break end time must be after break start time for ${hours.dayOfWeek}`);
+          throw new BadRequestException(
+            `Break end time must be after break start time for ${hours.dayOfWeek}`,
+          );
         }
 
         // Break must be within business hours
-        if (hours.breakStartTime < hours.openTime || hours.breakEndTime > hours.closeTime) {
-          throw new BadRequestException(`Break time must be within business hours for ${hours.dayOfWeek}`);
+        if (
+          hours.breakStartTime < hours.openTime ||
+          hours.breakEndTime > hours.closeTime
+        ) {
+          throw new BadRequestException(
+            `Break time must be within business hours for ${hours.dayOfWeek}`,
+          );
         }
       }
     }

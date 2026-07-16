@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsEmail, IsNumber, IsArray, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMerchantProfileDto {
@@ -6,7 +12,9 @@ export class CreateMerchantProfileDto {
   @IsString()
   businessName: string;
 
-  @ApiPropertyOptional({ example: 'Premium coffee and pastries in the heart of Addis' })
+  @ApiPropertyOptional({
+    example: 'Premium coffee and pastries in the heart of Addis',
+  })
   @IsOptional()
   @IsString()
   description?: string;

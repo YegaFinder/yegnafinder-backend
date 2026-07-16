@@ -5,7 +5,9 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { UploadsService, UploadType } from '../uploads.service';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
-  getSignedUrl: jest.fn().mockResolvedValue('https://s3.example.com/presigned-url'),
+  getSignedUrl: jest
+    .fn()
+    .mockResolvedValue('https://s3.example.com/presigned-url'),
 }));
 
 describe('UploadsService', () => {
@@ -54,26 +56,24 @@ describe('UploadsService', () => {
           'test.txt',
           'text/plain',
           UploadType.AVATAR,
-          'user-123'
-        )
+          'user-123',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should accept valid image content types for avatar', async () => {
       const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      
+
       for (const contentType of validTypes) {
         const result = await service.generatePresignedUrl(
           'test.jpg',
           contentType,
           UploadType.AVATAR,
-          'user-123'
+          'user-123',
         );
-        expect(result).toEqual({
-          uploadUrl: 'https://s3.example.com/presigned-url',
-          fileUrl: expect.stringContaining('uploads/avatars/user-123/'),
-          key: expect.stringContaining('uploads/avatars/user-123/'),
-        });
+        expect(result.uploadUrl).toBe('https://s3.example.com/presigned-url');
+        expect(result.fileUrl).toContain('uploads/avatars/user-123/');
+        expect(result.key).toContain('uploads/avatars/user-123/');
       }
 
       expect(getSignedUrl).toHaveBeenCalled();

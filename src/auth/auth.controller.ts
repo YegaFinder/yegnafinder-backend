@@ -46,14 +46,23 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered — OTP sent to email.' })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered — OTP sent to email.',
+  })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   async register(@Body() registerDto: RegisterDto) {
     const otp = await this.authService.register(registerDto);
     if (otp) {
-      return ok({ otp, message: 'TEST MODE: OTP displayed for simulation' }, 'Registration successful. For simulation, enter code: ' + otp);
+      return ok(
+        { otp, message: 'TEST MODE: OTP displayed for simulation' },
+        'Registration successful. For simulation, enter code: ' + otp,
+      );
     }
-    return ok(null, 'Registration successful. Please check your email for the OTP.');
+    return ok(
+      null,
+      'Registration successful. Please check your email for the OTP.',
+    );
   }
 
   /* ------------------------------------------------------------------ */
@@ -64,7 +73,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful', type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 403, description: 'Email not verified' })
   @ApiResponse({ status: 429, description: 'Too many login attempts' })
@@ -72,7 +85,11 @@ export class AuthController {
     const ipAddress = req.ip ?? req.socket?.remoteAddress;
     // user-agent can be string | string[] — normalise to a single string
     const deviceInfo = String(req.headers['user-agent'] ?? '');
-    const result = await this.authService.login(loginDto, deviceInfo, ipAddress);
+    const result = await this.authService.login(
+      loginDto,
+      deviceInfo,
+      ipAddress,
+    );
     return ok(result, 'Login successful');
   }
 
@@ -83,13 +100,23 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Rotate a refresh token — issues a fresh access + refresh pair' })
-  @ApiResponse({ status: 200, description: 'Tokens refreshed', type: AuthResponseDto })
+  @ApiOperation({
+    summary: 'Rotate a refresh token — issues a fresh access + refresh pair',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(@Body() body: RefreshTokenDto, @Req() req: Request) {
     const ipAddress = req.ip ?? req.socket?.remoteAddress;
     const deviceInfo = String(req.headers['user-agent'] ?? '');
-    const result = await this.authService.refresh(body.refreshToken, deviceInfo, ipAddress);
+    const result = await this.authService.refresh(
+      body.refreshToken,
+      deviceInfo,
+      ipAddress,
+    );
     return ok(result, 'Token refreshed');
   }
 
@@ -116,12 +143,20 @@ export class AuthController {
   @Post('google')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign in / sign up with a Google idToken' })
-  @ApiResponse({ status: 200, description: 'Google login successful', type: AuthResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Google login successful',
+    type: AuthResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid Google token' })
   async googleLogin(@Body() body: GoogleLoginDto, @Req() req: Request) {
     const ipAddress = req.ip ?? req.socket?.remoteAddress;
     const deviceInfo = String(req.headers['user-agent'] ?? '');
-    const result = await this.authService.googleLogin(body.idToken, deviceInfo, ipAddress);
+    const result = await this.authService.googleLogin(
+      body.idToken,
+      deviceInfo,
+      ipAddress,
+    );
     return ok(result, 'Google login successful');
   }
 
@@ -149,7 +184,9 @@ export class AuthController {
   @Post('logout-all')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Logout from all devices — revoke every active session' })
+  @ApiOperation({
+    summary: 'Logout from all devices — revoke every active session',
+  })
   @ApiResponse({ status: 200, description: 'Logged out from all devices' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logoutAll(@CurrentUser() user: User) {
@@ -186,7 +223,10 @@ export class AuthController {
   async resendVerification(@Body() requestDto: RequestPasswordResetDto) {
     const otp = await this.authService.resendVerificationOtp(requestDto.email);
     if (otp) {
-      return ok({ otp, message: 'TEST MODE: OTP displayed for simulation' }, 'Verification code resent. For simulation, enter code: ' + otp);
+      return ok(
+        { otp, message: 'TEST MODE: OTP displayed for simulation' },
+        'Verification code resent. For simulation, enter code: ' + otp,
+      );
     }
     return ok(null, 'Verification code resent successfully.');
   }
@@ -199,7 +239,10 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset OTP (forgot-password)' })
-  @ApiResponse({ status: 200, description: 'If the email exists, an OTP has been sent.' })
+  @ApiResponse({
+    status: 200,
+    description: 'If the email exists, an OTP has been sent.',
+  })
   async forgotPassword(@Body() requestDto: RequestPasswordResetDto) {
     const otp = await this.authService.requestPasswordReset(requestDto);
     if (otp) {
@@ -209,7 +252,10 @@ export class AuthController {
       );
     }
     return ok(
-      { message: 'If the email is registered, a password reset OTP has been sent.' },
+      {
+        message:
+          'If the email is registered, a password reset OTP has been sent.',
+      },
       'Request processed',
     );
   }
@@ -222,7 +268,10 @@ export class AuthController {
   @Post('request-password-reset')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request password reset OTP (legacy alias)' })
-  @ApiResponse({ status: 200, description: 'If the email exists, an OTP has been sent.' })
+  @ApiResponse({
+    status: 200,
+    description: 'If the email exists, an OTP has been sent.',
+  })
   async requestPasswordReset(@Body() requestDto: RequestPasswordResetDto) {
     const otp = await this.authService.requestPasswordReset(requestDto);
     if (otp) {
@@ -232,7 +281,10 @@ export class AuthController {
       );
     }
     return ok(
-      { message: 'If the email is registered, a password reset OTP has been sent.' },
+      {
+        message:
+          'If the email is registered, a password reset OTP has been sent.',
+      },
       'Request processed',
     );
   }
@@ -246,7 +298,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password with OTP' })
   @ApiResponse({ status: 200, description: 'Password successfully reset' })
-  @ApiResponse({ status: 400, description: 'Invalid OTP or password criteria not met' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid OTP or password criteria not met',
+  })
   async resetPassword(@Body() resetDto: ResetPasswordDto) {
     await this.authService.resetPassword(resetDto);
     return ok(null, 'Password has been successfully reset.');

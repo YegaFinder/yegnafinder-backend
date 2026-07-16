@@ -24,10 +24,20 @@ export class MerchantProfile extends BaseEntity {
   @Column({ name: 'banner_url', type: 'varchar', length: 500, nullable: true })
   bannerUrl?: string;
 
-  @Column({ name: 'contact_email', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'contact_email',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   contactEmail?: string;
 
-  @Column({ name: 'contact_phone', type: 'varchar', length: 20, nullable: true })
+  @Column({
+    name: 'contact_phone',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+  })
   contactPhone?: string;
 
   @Column({ name: 'business_address', type: 'text', nullable: true })
@@ -62,7 +72,9 @@ export class MerchantProfile extends BaseEntity {
     currency?: string;
   }>;
 
-  @OneToMany(() => BusinessHours, (hours) => hours.merchantProfile, { cascade: true })
+  @OneToMany(() => BusinessHours, (hours) => hours.merchantProfile, {
+    cascade: true,
+  })
   businessHours: BusinessHours[];
 
   @Column({ name: 'verification_status', type: 'varchar', default: 'pending' })
@@ -75,7 +87,13 @@ export class MerchantProfile extends BaseEntity {
     uploadedAt: Date;
   }>;
 
-  @Column({ name: 'average_rating', type: 'decimal', precision: 3, scale: 2, default: 0 })
+  @Column({
+    name: 'average_rating',
+    type: 'decimal',
+    precision: 3,
+    scale: 2,
+    default: 0,
+  })
   averageRating: number;
 
   @Column({ name: 'total_reviews', type: 'integer', default: 0 })

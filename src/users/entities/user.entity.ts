@@ -18,7 +18,12 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   phone?: string;
 
-  @Column({ name: 'password_hash', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'password_hash',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   passwordHash?: string;
 
   @Column({
@@ -40,7 +45,13 @@ export class User extends BaseEntity {
   @Column({ name: 'fcm_token', type: 'varchar', length: 255, nullable: true })
   fcmToken?: string;
 
-  @Column({ name: 'google_id', type: 'varchar', length: 255, nullable: true, unique: true })
+  @Column({
+    name: 'google_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    unique: true,
+  })
   googleId?: string;
 
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })

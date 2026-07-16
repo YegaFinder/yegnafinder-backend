@@ -51,11 +51,7 @@ export class RefreshTokenService {
       relations: { user: true },
     });
 
-    if (
-      !stored ||
-      stored.isRevoked ||
-      stored.expiresAt < new Date()
-    ) {
+    if (!stored || stored.isRevoked || stored.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
@@ -90,7 +86,9 @@ export class RefreshTokenService {
 
     // Remove each session entry from Redis
     await Promise.all(
-      activeTokens.map((t) => this.sessionCacheService.deleteSession(t.tokenHash)),
+      activeTokens.map((t) =>
+        this.sessionCacheService.deleteSession(t.tokenHash),
+      ),
     );
   }
 

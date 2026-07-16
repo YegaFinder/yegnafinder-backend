@@ -18,9 +18,13 @@ export class OtpService {
     private configService: ConfigService,
     private mailService: MailService,
   ) {
-    this.expirySeconds = this.configService.get<number>('OTP_EXPIRY_SECONDS', 300);
+    this.expirySeconds = this.configService.get<number>(
+      'OTP_EXPIRY_SECONDS',
+      300,
+    );
     this.otpLength = this.configService.get<number>('OTP_LENGTH', 6);
-    this.isTestMode = this.configService.get<string>('TEST_MODE', 'false') === 'true';
+    this.isTestMode =
+      this.configService.get<string>('TEST_MODE', 'false') === 'true';
   }
 
   generateOtp(): string {
@@ -29,7 +33,11 @@ export class OtpService {
     return crypto.randomInt(min, max).toString();
   }
 
-  async storeOtp(type: 'verify' | 'reset', email: string, otp: string): Promise<string | null> {
+  async storeOtp(
+    type: 'verify' | 'reset',
+    email: string,
+    otp: string,
+  ): Promise<string | null> {
     const key = `otp:${type}:${email}`;
     const value = { otp, attempts: 0 };
     await this.cacheManager.set(key, value, this.expirySeconds * 1000);
@@ -39,9 +47,14 @@ export class OtpService {
     return this.isTestMode ? otp : null;
   }
 
-  async verifyOtp(type: 'verify' | 'reset', email: string, providedOtp: string): Promise<boolean> {
+  async verifyOtp(
+    type: 'verify' | 'reset',
+    email: string,
+    providedOtp: string,
+  ): Promise<boolean> {
     const key = `otp:${type}:${email}`;
-    const data: { otp: string; attempts: number } | undefined = await this.cacheManager.get(key);
+    const data: { otp: string; attempts: number } | undefined =
+      await this.cacheManager.get(key);
 
     if (!data) {
       throw new BadRequestException('OTP has expired or does not exist');
@@ -49,7 +62,9 @@ export class OtpService {
 
     if (data.attempts >= this.MAX_ATTEMPTS) {
       await this.cacheManager.del(key);
-      throw new BadRequestException('Too many failed attempts. Please request a new OTP');
+      throw new BadRequestException(
+        'Too many failed attempts. Please request a new OTP',
+      );
     }
 
     if (data.otp !== providedOtp) {
@@ -82,7 +97,12 @@ export class OtpService {
       : 'Use the code below to reset your password.';
     const expiryMinutes = Math.ceil(this.expirySeconds / 60);
 
-    const html = this.buildOtpEmailHtml({ title, bodyText, otp, expiryMinutes });
+    const html = this.buildOtpEmailHtml({
+      title,
+      bodyText,
+      otp,
+      expiryMinutes,
+    });
 
     await this.mailService.sendMail({ to: email, subject, html });
   }

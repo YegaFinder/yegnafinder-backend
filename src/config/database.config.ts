@@ -1,10 +1,13 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import {
+  TypeOrmModuleAsyncOptions,
+  TypeOrmModuleOptions,
+} from '@nestjs/typeorm';
 
 export const databaseConfig: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
   inject: [ConfigService],
-  useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
+  useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
     type: 'postgres',
     url: configService.get<string>('DATABASE_URL'),
     autoLoadEntities: true,

@@ -14,7 +14,11 @@ export class AuthResponseDto {
   @ApiProperty({ description: 'User role for frontend routing' })
   role: string;
 
-  constructor(data: { accessToken: string; refreshToken: string; user: UserResponseDto }) {
+  constructor(data: {
+    accessToken: string;
+    refreshToken: string;
+    user: UserResponseDto;
+  }) {
     this.accessToken = data.accessToken;
     this.refreshToken = data.refreshToken;
     this.user = data.user;
