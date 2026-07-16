@@ -13,6 +13,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from '../../users/entities/user.entity';
 import { ProfilesService } from '../services/profiles.service';
 import {
   CreateMerchantProfileDto,
@@ -36,66 +38,53 @@ export class MerchantProfilesController {
   @Post()
   @ApiOperation({ summary: 'Create merchant profile' })
   async create(
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: User,
     @Body() createProfileDto: CreateMerchantProfileDto,
   ): Promise<MerchantProfileResponseDto> {
-    const profile = await this.profilesService.createMerchantProfile(
-      req.user.id,
-      createProfileDto,
-    );
+    const profile = await this.profilesService.createMerchantProfile(user.id, createProfileDto);
     return new MerchantProfileResponseDto(profile);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get merchant profile' })
-  async findOne(
-    @Request() req: AuthenticatedRequest,
-  ): Promise<MerchantProfileResponseDto> {
-    const profile = await this.profilesService.getMerchantProfile(req.user.id);
+  async findOne(@CurrentUser() user: User): Promise<MerchantProfileResponseDto> {
+    const profile = await this.profilesService.getMerchantProfile(user.id);
     return new MerchantProfileResponseDto(profile);
   }
 
   @Put()
   @ApiOperation({ summary: 'Update merchant profile' })
   async update(
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: User,
     @Body() updateProfileDto: UpdateMerchantProfileDto,
   ): Promise<MerchantProfileResponseDto> {
-    const profile = await this.profilesService.updateMerchantProfile(
-      req.user.id,
-      updateProfileDto,
-    );
+    const profile = await this.profilesService.updateMerchantProfile(user.id, updateProfileDto);
     return new MerchantProfileResponseDto(profile);
   }
 
   @Put('business-hours')
   @ApiOperation({ summary: 'Update merchant business hours' })
   async updateBusinessHours(
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: User,
     @Body() dto: UpdateBusinessHoursDto,
   ): Promise<any> {
-    const profile = await this.profilesService.getMerchantProfile(req.user.id);
-    const businessHours = await this.businessHoursService.updateBusinessHours(
-      profile.id,
-      dto.businessHours,
-    );
+    const profile = await this.profilesService.getMerchantProfile(user.id);
+    const businessHours = await this.businessHoursService.updateBusinessHours(profile.id, dto.businessHours);
     return { success: true, businessHours };
   }
 
   @Get('business-hours')
   @ApiOperation({ summary: 'Get merchant business hours' })
-  async getBusinessHours(@Request() req: AuthenticatedRequest): Promise<any> {
-    const profile = await this.profilesService.getMerchantProfile(req.user.id);
-    const businessHours = await this.businessHoursService.getBusinessHours(
-      profile.id,
-    );
+  async getBusinessHours(@CurrentUser() user: User): Promise<any> {
+    const profile = await this.profilesService.getMerchantProfile(user.id);
+    const businessHours = await this.businessHoursService.getBusinessHours(profile.id);
     return { businessHours };
   }
 
   @Get('is-open')
   @ApiOperation({ summary: 'Check if merchant is currently open' })
-  async isOpen(@Request() req: AuthenticatedRequest): Promise<any> {
-    const profile = await this.profilesService.getMerchantProfile(req.user.id);
+  async isOpen(@CurrentUser() user: User): Promise<any> {
+    const profile = await this.profilesService.getMerchantProfile(user.id);
     const isOpen = await this.businessHoursService.isOpenNow(profile.id);
     return { isOpen };
   }

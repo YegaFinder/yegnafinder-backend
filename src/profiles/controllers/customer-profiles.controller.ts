@@ -13,6 +13,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from '../../users/entities/user.entity';
 import { ProfilesService } from '../services/profiles.service';
 import {
   CreateCustomerProfileDto,
@@ -31,35 +33,27 @@ export class CustomerProfilesController {
   @Post()
   @ApiOperation({ summary: 'Create customer profile' })
   async create(
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: User,
     @Body() createProfileDto: CreateCustomerProfileDto,
   ): Promise<CustomerProfileResponseDto> {
-    const profile = await this.profilesService.createCustomerProfile(
-      req.user.id,
-      createProfileDto,
-    );
+    const profile = await this.profilesService.createCustomerProfile(user.id, createProfileDto);
     return new CustomerProfileResponseDto(profile);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get customer profile' })
-  async findOne(
-    @Request() req: AuthenticatedRequest,
-  ): Promise<CustomerProfileResponseDto> {
-    const profile = await this.profilesService.getCustomerProfile(req.user.id);
+  async findOne(@CurrentUser() user: User): Promise<CustomerProfileResponseDto> {
+    const profile = await this.profilesService.getCustomerProfile(user.id);
     return new CustomerProfileResponseDto(profile);
   }
 
   @Put()
   @ApiOperation({ summary: 'Update customer profile' })
   async update(
-    @Request() req: AuthenticatedRequest,
+    @CurrentUser() user: User,
     @Body() updateProfileDto: UpdateCustomerProfileDto,
   ): Promise<CustomerProfileResponseDto> {
-    const profile = await this.profilesService.updateCustomerProfile(
-      req.user.id,
-      updateProfileDto,
-    );
+    const profile = await this.profilesService.updateCustomerProfile(user.id, updateProfileDto);
     return new CustomerProfileResponseDto(profile);
   }
 }

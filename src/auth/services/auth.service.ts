@@ -184,7 +184,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid Google token');
     }
 
-    const payload: TokenPayload | undefined = ticket.getPayload();
+    const payload = ticket.getPayload() as TokenPayload | undefined;
     if (!payload?.email || !payload.sub) {
       throw new UnauthorizedException(
         'Google token did not contain required claims',
