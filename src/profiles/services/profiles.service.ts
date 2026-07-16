@@ -31,7 +31,7 @@ export class ProfilesService {
     const profile = this.customerProfileRepository.create({
       userId,
       ...dto,
-      isProfileComplete: this.checkCustomerProfileCompletion(dto),
+      isProfileComplete: this.checkCustomerProfileCompletion(dto as Partial<CustomerProfile>),
     });
 
     return this.customerProfileRepository.save(profile);
@@ -40,7 +40,7 @@ export class ProfilesService {
   async getCustomerProfile(userId: string): Promise<CustomerProfile> {
     const profile = await this.customerProfileRepository.findOne({
       where: { userId },
-      relations: ['user'],
+      relations: { user: true },
     });
     if (!profile) throw new NotFoundException('Customer profile not found');
     return profile;
@@ -74,7 +74,7 @@ export class ProfilesService {
   async getMerchantProfile(userId: string): Promise<MerchantProfile> {
     const profile = await this.merchantProfileRepository.findOne({
       where: { userId },
-      relations: ['user'], // Note: 'businessHours' will be added by Developer 2
+      relations: { user: true, businessHours: true },
     });
     if (!profile) throw new NotFoundException('Merchant profile not found');
     return profile;

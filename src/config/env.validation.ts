@@ -64,6 +64,26 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   SMTP_FROM: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_REGION: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_ACCESS_KEY_ID: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_SECRET_ACCESS_KEY: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_S3_BUCKET: string;
+
+  @IsString()
+  @IsOptional()
+  AWS_S3_CDN_URL: string;
 }
 
 export function validate(config: Record<string, unknown>) {

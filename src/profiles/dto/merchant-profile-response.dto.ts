@@ -88,7 +88,7 @@ export class MerchantProfileResponseDto {
     this.socialMedia = profile.socialMedia;
     this.businessCategories = profile.businessCategories;
     this.servicesOffered = profile.servicesOffered;
-    this.businessHours = []; // Will be populated by Developer 2's business hours system
+    this.businessHours = profile.businessHours || [];
     this.verificationStatus = profile.verificationStatus;
     this.averageRating = profile.averageRating;
     this.totalReviews = profile.totalReviews;

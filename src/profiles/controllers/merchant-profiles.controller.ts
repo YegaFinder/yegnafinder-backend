@@ -1,12 +1,14 @@
 import { Controller, Get, Post, Put, Body, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 import { ProfilesService } from '../services/profiles.service';
 import { CreateMerchantProfileDto, UpdateMerchantProfileDto } from '../dto/create-merchant-profile.dto';
 import { MerchantProfileResponseDto } from '../dto/merchant-profile-response.dto';
+import { BusinessHoursService } from '../services/business-hours.service';
+import { UpdateBusinessHoursDto } from '../dto/business-hours.dto';
 
 @ApiTags('Merchant Profiles')
 @ApiBearerAuth()
@@ -14,7 +16,10 @@ import { MerchantProfileResponseDto } from '../dto/merchant-profile-response.dto
 @Roles(UserRole.MERCHANT)
 @Controller('profiles/merchant')
 export class MerchantProfilesController {
-  constructor(private readonly profilesService: ProfilesService) {}
+  constructor(
+    private readonly profilesService: ProfilesService,
+    private readonly businessHoursService: BusinessHoursService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create merchant profile' })
@@ -43,8 +48,30 @@ export class MerchantProfilesController {
     return new MerchantProfileResponseDto(profile);
   }
 
-  // Note: Business hours endpoints will be added by Developer 2
-  // @Put('business-hours') - Update business hours
-  // @Get('business-hours') - Get business hours  
-  // @Get('is-open') - Check if currently open
+  @Put('business-hours')
+  @ApiOperation({ summary: 'Update merchant business hours' })
+  async updateBusinessHours(
+    @Request() req,
+    @Body() dto: UpdateBusinessHoursDto,
+  ): Promise<any> {
+    const profile = await this.profilesService.getMerchantProfile(req.user.sub);
+    const businessHours = await this.businessHoursService.updateBusinessHours(profile.id, dto.businessHours);
+    return { success: true, businessHours };
+  }
+
+  @Get('business-hours')
+  @ApiOperation({ summary: 'Get merchant business hours' })
+  async getBusinessHours(@Request() req): Promise<any> {
+    const profile = await this.profilesService.getMerchantProfile(req.user.sub);
+    const businessHours = await this.businessHoursService.getBusinessHours(profile.id);
+    return { businessHours };
+  }
+
+  @Get('is-open')
+  @ApiOperation({ summary: 'Check if merchant is currently open' })
+  async isOpen(@Request() req): Promise<any> {
+    const profile = await this.profilesService.getMerchantProfile(req.user.sub);
+    const isOpen = await this.businessHoursService.isOpenNow(profile.id);
+    return { isOpen };
+  }
 }

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CommonModule } from './common/common.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
@@ -26,6 +27,7 @@ import { validate } from './config/env.validation';
     AuthModule,
     UsersModule,
     ProfilesModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

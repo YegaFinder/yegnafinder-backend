@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
+import { BusinessHours } from './business-hours.entity';
 
 @Entity('merchant_profiles')
 export class MerchantProfile extends BaseEntity {
@@ -61,9 +62,8 @@ export class MerchantProfile extends BaseEntity {
     currency?: string;
   }>;
 
-  // Note: BusinessHours will be added by Developer 2
-  // @OneToMany(() => BusinessHours, (hours) => hours.merchantProfile, { cascade: true })
-  // businessHours: BusinessHours[];
+  @OneToMany(() => BusinessHours, (hours) => hours.merchantProfile, { cascade: true })
+  businessHours: BusinessHours[];
 
   @Column({ name: 'verification_status', type: 'varchar', default: 'pending' })
   verificationStatus: 'pending' | 'verified' | 'rejected';
