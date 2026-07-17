@@ -28,6 +28,8 @@ services:
           property: port
       - key: REDIS_PASSWORD
         value: ""
+      - key: TEST_MODE
+        value: "true"
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
