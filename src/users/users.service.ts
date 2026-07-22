@@ -42,6 +42,8 @@ export class UsersService {
       phone,
       passwordHash,
       role: role || UserRole.CUSTOMER,
+      hasAcceptedTerms: createUserDto.agreedToTerms === true,
+      termsAcceptedAt: createUserDto.agreedToTerms === true ? new Date() : undefined,
     });
 
     return this.usersRepository.save(user);
@@ -110,6 +112,8 @@ export class UsersService {
       googleId: opts.googleId,
       role: UserRole.CUSTOMER,
       isEmailVerified: true, // Google already verified the email
+      hasAcceptedTerms: true,
+      termsAcceptedAt: new Date(),
     });
     return this.usersRepository.save(user);
   }

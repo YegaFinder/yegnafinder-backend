@@ -42,6 +42,12 @@ export class User extends BaseEntity {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'has_accepted_terms', default: false })
+  hasAcceptedTerms: boolean;
+
+  @Column({ name: 'terms_accepted_at', type: 'timestamp', nullable: true })
+  termsAcceptedAt?: Date;
+
   @Column({ name: 'fcm_token', type: 'varchar', length: 255, nullable: true })
   fcmToken?: string;
 

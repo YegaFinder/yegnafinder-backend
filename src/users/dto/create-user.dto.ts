@@ -5,6 +5,8 @@ import {
   IsString,
   Matches,
   MinLength,
+  IsBoolean,
+  Equals,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../enums/user-role.enum';
@@ -40,4 +42,9 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiProperty({ example: true, description: 'User must agree to Terms of Service and Privacy Policy' })
+  @IsBoolean()
+  @Equals(true, { message: 'You must accept the terms and conditions' })
+  agreedToTerms: boolean;
 }
