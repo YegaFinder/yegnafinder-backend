@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MerchantProfile } from '../entities/merchant-profile.entity';
+import { Business } from '../entities/business.entity';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 
-export class MerchantProfileResponseDto {
+export class BusinessResponseDto {
   @ApiProperty()
   id: string;
 
@@ -43,7 +43,7 @@ export class MerchantProfileResponseDto {
   socialMedia: Record<string, string>;
 
   @ApiProperty()
-  businessCategories: string[];
+  businessCategories: any[];
 
   @ApiProperty()
   servicesOffered: Array<any>;
@@ -72,7 +72,7 @@ export class MerchantProfileResponseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  constructor(profile: MerchantProfile) {
+  constructor(profile: Business) {
     this.id = profile.id;
     this.user = new UserResponseDto(profile.user);
     this.businessName = profile.businessName;

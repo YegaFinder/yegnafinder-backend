@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { MerchantProfile } from './merchant-profile.entity';
+import { Business } from './business.entity';
 
 export enum DayOfWeek {
   MONDAY = 'Monday',
@@ -14,14 +14,14 @@ export enum DayOfWeek {
 
 @Entity('business_hours')
 export class BusinessHours extends BaseEntity {
-  @ManyToOne(() => MerchantProfile, (profile) => profile.businessHours, {
+  @ManyToOne(() => Business, (business) => business.businessHours, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'merchant_profile_id' })
-  merchantProfile: MerchantProfile;
+  @JoinColumn({ name: 'business_id' })
+  business: Business;
 
-  @Column({ name: 'merchant_profile_id', type: 'uuid' })
-  merchantProfileId: string;
+  @Column({ name: 'business_id', type: 'uuid' })
+  businessId: string;
 
   @Column({
     name: 'day_of_week',

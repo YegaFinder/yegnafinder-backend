@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CustomerProfile } from '../entities/customer-profile.entity';
+import { Profile } from '../entities/profile.entity';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
 
-export class CustomerProfileResponseDto {
+export class ProfileResponseDto {
   @ApiProperty()
   id: string;
 
@@ -39,7 +39,7 @@ export class CustomerProfileResponseDto {
   @ApiProperty()
   updatedAt: Date;
 
-  constructor(profile: CustomerProfile) {
+  constructor(profile: Profile) {
     this.id = profile.id;
     this.user = new UserResponseDto(profile.user);
     this.avatarUrl = profile.avatarUrl;

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BusinessHours, DayOfWeek } from '../entities/business-hours.entity';
-import { MerchantProfile } from '../entities/merchant-profile.entity';
+import { Business } from '../entities/business.entity';
 import { BusinessHoursDto } from '../dto/business-hours.dto';
 
 @Injectable()
@@ -14,32 +14,32 @@ export class BusinessHoursService {
   constructor(
     @InjectRepository(BusinessHours)
     private businessHoursRepository: Repository<BusinessHours>,
-    @InjectRepository(MerchantProfile)
-    private merchantProfileRepository: Repository<MerchantProfile>,
+    @InjectRepository(Business)
+    private businessRepository: Repository<Business>,
   ) {}
 
   async updateBusinessHours(
-    merchantProfileId: string,
+    businessId: string,
     hoursData: BusinessHoursDto[],
   ): Promise<BusinessHours[]> {
-    // Verify merchant profile exists
-    const merchantProfile = await this.merchantProfileRepository.findOne({
-      where: { id: merchantProfileId },
+    // Verify business exists
+    const business = await this.businessRepository.findOne({
+      where: { id: businessId },
     });
-    if (!merchantProfile) {
-      throw new NotFoundException('Merchant profile not found');
+    if (!business) {
+      throw new NotFoundException('Business not found');
     }
 
     // Validate business hours data
     this.validateBusinessHours(hoursData);
 
     // Delete existing business hours
-    await this.businessHoursRepository.delete({ merchantProfileId });
+    await this.businessHoursRepository.delete({ businessId });
 
     // Create new business hours
     const businessHours = hoursData.map((hours) => {
       return this.businessHoursRepository.create({
-        merchantProfileId,
+        businessId,
         ...hours,
       });
     });
@@ -47,20 +47,20 @@ export class BusinessHoursService {
     return this.businessHoursRepository.save(businessHours);
   }
 
-  async getBusinessHours(merchantProfileId: string): Promise<BusinessHours[]> {
+  async getBusinessHours(businessId: string): Promise<BusinessHours[]> {
     return this.businessHoursRepository.find({
-      where: { merchantProfileId },
+      where: { businessId },
       order: { dayOfWeek: 'ASC' },
     });
   }
 
-  async isOpenNow(merchantProfileId: string): Promise<boolean> {
+  async isOpenNow(businessId: string): Promise<boolean> {
     const now = new Date();
     const dayOfWeek = this.getCurrentDayOfWeek(now);
     const currentTime = this.formatTime(now);
 
     const todayHours = await this.businessHoursRepository.findOne({
-      where: { merchantProfileId, dayOfWeek },
+      where: { businessId, dayOfWeek },
     });
 
     if (!todayHours || todayHours.isClosed) {

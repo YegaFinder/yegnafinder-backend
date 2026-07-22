@@ -2,8 +2,8 @@ import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 
-@Entity('customer_profiles')
-export class CustomerProfile extends BaseEntity {
+@Entity('profiles')
+export class Profile extends BaseEntity {
   @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;

@@ -1,7 +1,7 @@
 import { IsOptional, IsString, IsDateString, IsArray } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
-export class CreateCustomerProfileDto {
+export class CreateProfileDto {
   @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
   @IsOptional()
   @IsString()
@@ -38,4 +38,4 @@ export class CreateCustomerProfileDto {
   }>;
 }
 
-export class UpdateCustomerProfileDto extends CreateCustomerProfileDto {}
+export class UpdateProfileDto extends PartialType(CreateProfileDto) {}

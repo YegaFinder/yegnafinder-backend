@@ -5,9 +5,9 @@ import {
   IsNumber,
   IsArray,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
-export class CreateMerchantProfileDto {
+export class CreateBusinessDto {
   @ApiProperty({ example: 'Bella Coffee House' })
   @IsString()
   businessName: string;
@@ -85,4 +85,4 @@ export class CreateMerchantProfileDto {
   }>;
 }
 
-export class UpdateMerchantProfileDto extends CreateMerchantProfileDto {}
+export class UpdateBusinessDto extends PartialType(CreateBusinessDto) {}

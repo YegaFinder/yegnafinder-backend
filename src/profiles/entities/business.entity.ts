@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, OneToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { BusinessHours } from './business-hours.entity';
+import { BusinessCategory } from './business-category.entity';
 
-@Entity('merchant_profiles')
-export class MerchantProfile extends BaseEntity {
+@Entity('businesses')
+export class Business extends BaseEntity {
   @OneToOne(() => User, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
@@ -60,8 +61,13 @@ export class MerchantProfile extends BaseEntity {
     tiktok?: string;
   };
 
-  @Column({ name: 'business_categories', type: 'jsonb', default: [] })
-  businessCategories: string[];
+  @ManyToMany(() => BusinessCategory, (category) => category.businesses, { cascade: true, eager: true })
+  @JoinTable({
+    name: 'business_categories_mapping',
+    joinColumn: { name: 'business_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  businessCategories: BusinessCategory[];
 
   @Column({ name: 'services_offered', type: 'jsonb', default: [] })
   servicesOffered: Array<{
@@ -72,7 +78,7 @@ export class MerchantProfile extends BaseEntity {
     currency?: string;
   }>;
 
-  @OneToMany(() => BusinessHours, (hours) => hours.merchantProfile, {
+  @OneToMany(() => BusinessHours, (hours) => hours.business, {
     cascade: true,
   })
   businessHours: BusinessHours[];
