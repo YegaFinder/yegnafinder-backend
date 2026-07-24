@@ -59,6 +59,22 @@ export class CreateBusinessDto {
   @IsString()
   websiteUrl?: string;
 
+  @ApiPropertyOptional({ example: 'TIN123456789' })
+  @IsOptional()
+  @IsString()
+  taxId?: string;
+
+  @ApiPropertyOptional({ example: 10 })
+  @IsOptional()
+  @IsNumber()
+  deliveryRadius?: number;
+
+  @ApiPropertyOptional({ example: ['Bole', 'Kazanchis'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  serviceAreas?: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   socialMedia?: {

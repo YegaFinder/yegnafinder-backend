@@ -63,6 +63,15 @@ export class User extends BaseEntity {
   @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
   lastLoginAt?: Date;
 
+  @Column({ name: 'referral_code', type: 'varchar', length: 50, unique: true, nullable: true })
+  referralCode?: string;
+
+  @Column({ name: 'is_two_factor_enabled', default: false })
+  isTwoFactorEnabled: boolean;
+
+  @Column({ name: 'two_factor_secret', type: 'varchar', length: 255, nullable: true })
+  twoFactorSecret?: string;
+
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshToken[];
 

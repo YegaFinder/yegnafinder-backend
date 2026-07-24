@@ -6,7 +6,7 @@ import {
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { MerchantProfilesController } from '../src/profiles/controllers/merchant-profiles.controller';
+import { MerchantController } from '../src/profiles/controllers/merchant.controller';
 import { ProfilesService } from '../src/profiles/services/profiles.service';
 import { BusinessHoursService } from '../src/profiles/services/business-hours.service';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
@@ -37,7 +37,7 @@ describe('MerchantProfilesController business hours (e2e)', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      controllers: [MerchantProfilesController],
+      controllers: [MerchantController],
       providers: [
         { provide: ProfilesService, useValue: mockProfilesService },
         { provide: BusinessHoursService, useValue: mockBusinessHoursService },

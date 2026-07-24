@@ -3,6 +3,8 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { BusinessHours } from './business-hours.entity';
 import { BusinessCategory } from './business-category.entity';
+import { Promotion } from './promotion.entity';
+import { BusinessStaff } from './business-staff.entity';
 
 @Entity('businesses')
 export class Business extends BaseEntity {
@@ -53,6 +55,15 @@ export class Business extends BaseEntity {
   @Column({ name: 'website_url', type: 'varchar', length: 500, nullable: true })
   websiteUrl?: string;
 
+  @Column({ name: 'tax_id', type: 'varchar', length: 50, nullable: true })
+  taxId?: string;
+
+  @Column({ name: 'delivery_radius', type: 'decimal', precision: 5, scale: 2, nullable: true })
+  deliveryRadius?: number;
+
+  @Column({ name: 'service_areas', type: 'jsonb', default: [] })
+  serviceAreas: string[];
+
   @Column({ name: 'social_media', type: 'jsonb', default: {} })
   socialMedia: {
     facebook?: string;
@@ -82,6 +93,16 @@ export class Business extends BaseEntity {
     cascade: true,
   })
   businessHours: BusinessHours[];
+
+  @OneToMany(() => Promotion, (promotion) => promotion.business, {
+    cascade: true,
+  })
+  promotions: Promotion[];
+
+  @OneToMany(() => BusinessStaff, (staff) => staff.business, {
+    cascade: true,
+  })
+  staffMembers: BusinessStaff[];
 
   @Column({ name: 'verification_status', type: 'varchar', default: 'pending' })
   verificationStatus: 'pending' | 'verified' | 'rejected';

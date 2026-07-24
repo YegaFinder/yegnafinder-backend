@@ -11,8 +11,11 @@ export class BusinessGallery extends BaseEntity {
   @Column({ name: 'business_id', type: 'uuid' })
   businessId: string;
 
-  @Column({ name: 'image_url', type: 'varchar', length: 500 })
-  imageUrl: string;
+  @Column({ name: 'media_url', type: 'varchar', length: 500 })
+  mediaUrl: string;
+
+  @Column({ name: 'media_type', type: 'varchar', length: 20, default: 'image' })
+  mediaType: string;
 
   @Column({ type: 'text', nullable: true })
   caption?: string;

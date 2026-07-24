@@ -4,13 +4,13 @@ import { Repository, DeleteResult } from 'typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { BusinessHoursService } from '../business-hours.service';
 import { BusinessHours, DayOfWeek } from '../../entities/business-hours.entity';
-import { MerchantProfile } from '../../entities/merchant-profile.entity';
+import { Business } from '../../entities/business.entity';
 import { BusinessHoursDto } from '../../dto/business-hours.dto';
 
 describe('BusinessHoursService', () => {
   let service: BusinessHoursService;
   let businessHoursRepository: Repository<BusinessHours>;
-  let merchantProfileRepository: Repository<MerchantProfile>;
+  let businessRepository: Repository<Business>;
 
   const mockRepository = {
     create: jest.fn(),
@@ -29,7 +29,7 @@ describe('BusinessHoursService', () => {
           useValue: mockRepository,
         },
         {
-          provide: getRepositoryToken(MerchantProfile),
+          provide: getRepositoryToken(Business),
           useValue: mockRepository,
         },
       ],
@@ -39,8 +39,8 @@ describe('BusinessHoursService', () => {
     businessHoursRepository = module.get<Repository<BusinessHours>>(
       getRepositoryToken(BusinessHours),
     );
-    merchantProfileRepository = module.get<Repository<MerchantProfile>>(
-      getRepositoryToken(MerchantProfile),
+    businessRepository = module.get<Repository<Business>>(
+      getRepositoryToken(Business),
     );
   });
 
@@ -60,8 +60,8 @@ describe('BusinessHoursService', () => {
       }),
     );
 
-    it('should throw NotFoundException when merchant profile not found', async () => {
-      jest.spyOn(merchantProfileRepository, 'findOne').mockResolvedValue(null);
+    it('should throw NotFoundException when business not found', async () => {
+      jest.spyOn(businessRepository, 'findOne').mockResolvedValue(null);
 
       await expect(
         service.updateBusinessHours(merchantProfileId, validHoursData),
@@ -69,10 +69,10 @@ describe('BusinessHoursService', () => {
     });
 
     it('should throw BadRequestException when missing days', async () => {
-      const merchantProfile = { id: merchantProfileId } as MerchantProfile;
+      const business = { id: merchantProfileId } as Business;
       jest
-        .spyOn(merchantProfileRepository, 'findOne')
-        .mockResolvedValue(merchantProfile);
+        .spyOn(businessRepository, 'findOne')
+        .mockResolvedValue(business);
 
       const incompleteData = validHoursData.slice(0, 5); // Missing 2 days
 
@@ -82,12 +82,12 @@ describe('BusinessHoursService', () => {
     });
 
     it('should successfully create business hours', async () => {
-      const merchantProfile = { id: merchantProfileId } as MerchantProfile;
+      const business = { id: merchantProfileId } as Business;
       const createdHours = validHoursData.map((h) => ({ ...h, id: 'hour-id' }));
 
       jest
-        .spyOn(merchantProfileRepository, 'findOne')
-        .mockResolvedValue(merchantProfile);
+        .spyOn(businessRepository, 'findOne')
+        .mockResolvedValue(business);
       const deleteSpy = jest
         .spyOn(businessHoursRepository, 'delete')
         .mockResolvedValue({ affected: 7 } as DeleteResult);
@@ -96,7 +96,7 @@ describe('BusinessHoursService', () => {
         .mockImplementation((data) => data as BusinessHours);
       const saveSpy = jest
         .spyOn(businessHoursRepository, 'save')
-        .mockResolvedValue(createdHours as BusinessHours[]);
+        .mockResolvedValue(createdHours as any);
 
       const result = await service.updateBusinessHours(
         merchantProfileId,
@@ -105,16 +105,16 @@ describe('BusinessHoursService', () => {
 
       expect(result).toEqual(createdHours);
       expect(deleteSpy).toHaveBeenCalledWith({
-        merchantProfileId,
+        businessId: merchantProfileId,
       });
       expect(saveSpy).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when close time is before open time', async () => {
-      const merchantProfile = { id: merchantProfileId } as MerchantProfile;
+      const business = { id: merchantProfileId } as Business;
       jest
-        .spyOn(merchantProfileRepository, 'findOne')
-        .mockResolvedValue(merchantProfile);
+        .spyOn(businessRepository, 'findOne')
+        .mockResolvedValue(business);
 
       const invalidHours = validHoursData.map((hours, index) =>
         index === 0
@@ -128,10 +128,10 @@ describe('BusinessHoursService', () => {
     });
 
     it('should throw BadRequestException when break is outside business hours', async () => {
-      const merchantProfile = { id: merchantProfileId } as MerchantProfile;
+      const business = { id: merchantProfileId } as Business;
       jest
-        .spyOn(merchantProfileRepository, 'findOne')
-        .mockResolvedValue(merchantProfile);
+        .spyOn(businessRepository, 'findOne')
+        .mockResolvedValue(business);
 
       const invalidHours = validHoursData.map((hours, index) =>
         index === 0
@@ -156,7 +156,7 @@ describe('BusinessHoursService', () => {
 
       expect(result).toEqual(hours);
       expect(findSpy).toHaveBeenCalledWith({
-        where: { merchantProfileId: 'profile-123' },
+        where: { businessId: 'profile-123' },
         order: { dayOfWeek: 'ASC' },
       });
     });

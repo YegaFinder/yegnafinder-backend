@@ -40,6 +40,13 @@ export class Profile extends BaseEntity {
     longitude: number;
   }>;
 
+  @Column({ name: 'current_location', type: 'jsonb', nullable: true })
+  currentLocation?: {
+    latitude: number;
+    longitude: number;
+    updatedAt: Date;
+  };
+
   @Column({ name: 'loyalty_points', type: 'integer', default: 0 })
   loyaltyPoints: number;
 
