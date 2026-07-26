@@ -4,11 +4,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 import { FavoritesService } from '../services/favorites.service';
-
-class AddFavoriteDto {
-  @ApiProperty()
-  businessId: string;
-}
+import { AddFavoriteDto } from '../dto/add-favorite.dto';
 
 @ApiTags('Favorites')
 @ApiBearerAuth()

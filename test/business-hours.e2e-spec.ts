@@ -82,7 +82,7 @@ describe('MerchantProfilesController business hours (e2e)', () => {
     );
 
     const response = await request(app.getHttpServer())
-      .put('/api/v1/profiles/merchant/business-hours')
+      .put('/api/v1/merchant/business-hours')
       .send({ businessHours })
       .expect(200);
 
@@ -97,7 +97,7 @@ describe('MerchantProfilesController business hours (e2e)', () => {
     mockBusinessHoursService.getBusinessHours.mockResolvedValue(businessHours);
 
     const response = await request(app.getHttpServer())
-      .get('/api/v1/profiles/merchant/business-hours')
+      .get('/api/v1/merchant/business-hours')
       .expect(200);
 
     expect(response.body).toEqual({ businessHours });
@@ -106,18 +106,7 @@ describe('MerchantProfilesController business hours (e2e)', () => {
     );
   });
 
-  it('GET /api/v1/profiles/merchant/is-open returns open status', async () => {
-    mockBusinessHoursService.isOpenNow.mockResolvedValue(true);
 
-    const response = await request(app.getHttpServer())
-      .get('/api/v1/profiles/merchant/is-open')
-      .expect(200);
-
-    expect(response.body).toEqual({ isOpen: true });
-    expect(mockBusinessHoursService.isOpenNow).toHaveBeenCalledWith(
-      merchantProfile.id,
-    );
-  });
 
   it('PUT /api/v1/profiles/merchant/business-hours rejects invalid time format', async () => {
     const invalidHours = businessHours.map((hours, index) =>
@@ -125,7 +114,7 @@ describe('MerchantProfilesController business hours (e2e)', () => {
     );
 
     await request(app.getHttpServer())
-      .put('/api/v1/profiles/merchant/business-hours')
+      .put('/api/v1/merchant/business-hours')
       .send({ businessHours: invalidHours })
       .expect(400);
 

@@ -53,7 +53,13 @@ export class ProfilesService {
       ),
     });
 
-    return this.profileRepository.save(profile);
+    const saved = await this.profileRepository.save(profile);
+    // Reload with relations so ProfileResponseDto can access profile.user
+    // without crashing (save() does not return joined relations).
+    return this.profileRepository.findOne({
+      where: { id: saved.id },
+      relations: { user: true },
+    }) as Promise<Profile>;
   }
 
   async getCustomerProfile(userId: string): Promise<Profile> {

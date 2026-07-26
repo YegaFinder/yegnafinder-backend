@@ -4,20 +4,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 import { SavedPlacesService } from '../services/saved-places.service';
-
-class AddSavedPlaceDto {
-  @ApiProperty()
-  label: string;
-  
-  @ApiProperty()
-  address: string;
-
-  @ApiPropertyOptional()
-  latitude?: number;
-
-  @ApiPropertyOptional()
-  longitude?: number;
-}
+import { AddSavedPlaceDto } from '../dto/add-saved-place.dto';
 
 @ApiTags('Saved Places')
 @ApiBearerAuth()
