@@ -6,11 +6,11 @@ import {
   Delete,
   Body,
   UseGuards,
-  Request,
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -28,6 +28,12 @@ import {
 import { BusinessResponseDto } from '../dto/business-response.dto';
 import { BusinessHoursService } from '../services/business-hours.service';
 import { UpdateBusinessHoursDto } from '../dto/business-hours.dto';
+import { BusinessGalleryService } from '../services/business-gallery.service';
+import { ListingApprovalService } from '../services/listing-approval.service';
+import { UploadsService, UploadType } from '../../uploads/services/uploads.service';
+import type { UploadedFileInput } from '../../uploads/services/uploads.service';
+import { IMAGE_UPLOAD_INTERCEPTOR_OPTIONS } from '../../uploads/upload-limits';
+import { SubmitListingDto } from '../dto/listing-approval.dto';
 
 @ApiTags('Merchant')
 @ApiBearerAuth()
@@ -38,6 +44,9 @@ export class MerchantController {
   constructor(
     private readonly profilesService: ProfilesService,
     private readonly businessHoursService: BusinessHoursService,
+    private readonly galleryService: BusinessGalleryService,
+    private readonly listingApprovalService: ListingApprovalService,
+    private readonly uploadsService: UploadsService,
   ) {}
 
   @Post('profile')
@@ -67,6 +76,18 @@ export class MerchantController {
     return new BusinessResponseDto(profile);
   }
 
+  @Post('listing/submit')
+  @ApiOperation({
+    summary: 'Submit the business listing for admin approval',
+  })
+  async submitListing(
+    @CurrentUser() user: User,
+    @Body() _dto: SubmitListingDto,
+  ): Promise<BusinessResponseDto> {
+    const profile = await this.listingApprovalService.submitForApproval(user.id);
+    return new BusinessResponseDto(profile);
+  }
+
   @Put('business-hours')
   @ApiOperation({ summary: 'Update merchant business hours' })
   async updateBusinessHours(
@@ -87,7 +108,7 @@ export class MerchantController {
   }
 
   @Post('logo')
-  @ApiOperation({ summary: 'Upload business logo' })
+  @ApiOperation({ summary: 'Upload business logo to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -100,18 +121,40 @@ export class MerchantController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', IMAGE_UPLOAD_INTERCEPTOR_OPTIONS))
   async uploadLogo(
     @CurrentUser() user: User,
-    @UploadedFile() file: any,
+    @UploadedFile() file: UploadedFileInput,
   ): Promise<BusinessResponseDto> {
-    const logoUrl = `https://s3.amazonaws.com/bucket/logos/${file.originalname}`;
-    const profile = await this.profilesService.updateMerchantProfile(user.id, { logoUrl });
-    return new BusinessResponseDto(profile);
+    if (!file) {
+      throw new BadRequestException('A file is required');
+    }
+    const profile = await this.profilesService.getMerchantProfile(user.id);
+    const previousLogoUrl = profile.logoUrl;
+    const uploaded = await this.uploadsService.uploadFile(
+      file,
+      UploadType.LOGO,
+      user.id,
+    );
+    let updated: BusinessResponseDto;
+    try {
+      updated = new BusinessResponseDto(
+        await this.profilesService.updateMerchantProfile(user.id, {
+          logoUrl: uploaded.fileUrl,
+        }),
+      );
+    } catch (error) {
+      await this.uploadsService.deleteFile(uploaded.key);
+      throw error;
+    }
+    if (previousLogoUrl) {
+      await this.uploadsService.deleteFile(previousLogoUrl);
+    }
+    return updated;
   }
 
   @Post('banner')
-  @ApiOperation({ summary: 'Upload business banner' })
+  @ApiOperation({ summary: 'Upload business banner to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -124,26 +167,48 @@ export class MerchantController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', IMAGE_UPLOAD_INTERCEPTOR_OPTIONS))
   async uploadBanner(
     @CurrentUser() user: User,
-    @UploadedFile() file: any,
+    @UploadedFile() file: UploadedFileInput,
   ): Promise<BusinessResponseDto> {
-    const bannerUrl = `https://s3.amazonaws.com/bucket/banners/${file.originalname}`;
-    const profile = await this.profilesService.updateMerchantProfile(user.id, { bannerUrl });
-    return new BusinessResponseDto(profile);
+    if (!file) {
+      throw new BadRequestException('A file is required');
+    }
+    const profile = await this.profilesService.getMerchantProfile(user.id);
+    const previousBannerUrl = profile.bannerUrl;
+    const uploaded = await this.uploadsService.uploadFile(
+      file,
+      UploadType.BANNER,
+      user.id,
+    );
+    let updated: BusinessResponseDto;
+    try {
+      updated = new BusinessResponseDto(
+        await this.profilesService.updateMerchantProfile(user.id, {
+          bannerUrl: uploaded.fileUrl,
+        }),
+      );
+    } catch (error) {
+      await this.uploadsService.deleteFile(uploaded.key);
+      throw error;
+    }
+    if (previousBannerUrl) {
+      await this.uploadsService.deleteFile(previousBannerUrl);
+    }
+    return updated;
   }
 
   @Get('gallery')
   @ApiOperation({ summary: 'Get business gallery' })
   async getGallery(@CurrentUser() user: User): Promise<any> {
     const profile = await this.profilesService.getMerchantProfile(user.id);
-    // Stub: in reality, fetch from business_gallery table
-    return { success: true, gallery: [] };
+    const gallery = await this.galleryService.getGallery(profile.id);
+    return { success: true, gallery };
   }
 
   @Post('gallery')
-  @ApiOperation({ summary: 'Upload business gallery photos' })
+  @ApiOperation({ summary: 'Upload business gallery photos to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -159,14 +224,18 @@ export class MerchantController {
       },
     },
   })
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FilesInterceptor('files', 10, IMAGE_UPLOAD_INTERCEPTOR_OPTIONS))
   async uploadGallery(
     @CurrentUser() user: User,
-    @UploadedFiles() files: Array<any>,
+    @UploadedFiles() files: Array<UploadedFileInput>,
   ): Promise<any> {
     const profile = await this.profilesService.getMerchantProfile(user.id);
-    // Stub implementation to save URLs to business_gallery table
-    return { success: true, message: 'Photos uploaded successfully' };
+    const gallery = await this.galleryService.uploadPhotos(
+      profile.id,
+      user.id,
+      files,
+    );
+    return { success: true, message: 'Photos uploaded successfully', gallery };
   }
 
   @Delete('gallery/:id')
@@ -176,7 +245,7 @@ export class MerchantController {
     @Param('id') photoId: string,
   ): Promise<any> {
     const profile = await this.profilesService.getMerchantProfile(user.id);
-    // Stub implementation
+    await this.galleryService.deletePhoto(profile.id, photoId);
     return { success: true, message: 'Photo deleted successfully' };
   }
 }

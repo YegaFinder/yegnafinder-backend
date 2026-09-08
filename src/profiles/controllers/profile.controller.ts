@@ -5,9 +5,9 @@ import {
   Put,
   Body,
   UseGuards,
-  Request,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,7 +23,9 @@ import {
   UpdateProfileDto,
 } from '../dto/create-profile.dto';
 import { ProfileResponseDto } from '../dto/profile-response.dto';
-// Note: We would import UploadsService if it was available here, but we will assume it's integrated or handled.
+import { UploadsService, UploadType } from '../../uploads/services/uploads.service';
+import type { UploadedFileInput } from '../../uploads/services/uploads.service';
+import { IMAGE_UPLOAD_INTERCEPTOR_OPTIONS } from '../../uploads/upload-limits';
 
 @ApiTags('Profile')
 @ApiBearerAuth()
@@ -31,7 +33,10 @@ import { ProfileResponseDto } from '../dto/profile-response.dto';
 @Roles(UserRole.CUSTOMER)
 @Controller('profile')
 export class ProfileController {
-  constructor(private readonly profilesService: ProfilesService) {}
+  constructor(
+    private readonly profilesService: ProfilesService,
+    private readonly uploadsService: UploadsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create customer profile' })
@@ -61,7 +66,7 @@ export class ProfileController {
   }
 
   @Post('avatar')
-  @ApiOperation({ summary: 'Upload profile avatar' })
+  @ApiOperation({ summary: 'Upload profile avatar to S3' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -74,14 +79,36 @@ export class ProfileController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', IMAGE_UPLOAD_INTERCEPTOR_OPTIONS))
   async uploadAvatar(
     @CurrentUser() user: User,
-    @UploadedFile() file: any,
+    @UploadedFile() file: UploadedFileInput,
   ): Promise<ProfileResponseDto> {
-    // Stub implementation for upload. In a real scenario, we'd use UploadsService.
-    const avatarUrl = `https://s3.amazonaws.com/bucket/avatars/${file.originalname}`;
-    const profile = await this.profilesService.updateCustomerProfile(user.id, { avatarUrl });
-    return new ProfileResponseDto(profile);
+    if (!file) {
+      throw new BadRequestException('A file is required');
+    }
+
+    const profile = await this.profilesService.getCustomerProfile(user.id);
+    const previousAvatarUrl = profile.avatarUrl;
+    const uploaded = await this.uploadsService.uploadFile(
+      file,
+      UploadType.AVATAR,
+      user.id,
+    );
+    let updated: ProfileResponseDto;
+    try {
+      updated = new ProfileResponseDto(
+        await this.profilesService.updateCustomerProfile(user.id, {
+          avatarUrl: uploaded.fileUrl,
+        }),
+      );
+    } catch (error) {
+      await this.uploadsService.deleteFile(uploaded.key);
+      throw error;
+    }
+    if (previousAvatarUrl) {
+      await this.uploadsService.deleteFile(previousAvatarUrl);
+    }
+    return updated;
   }
 }

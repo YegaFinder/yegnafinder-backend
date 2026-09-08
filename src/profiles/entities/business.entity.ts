@@ -5,6 +5,7 @@ import { BusinessHours } from './business-hours.entity';
 import { BusinessCategory } from './business-category.entity';
 import { Promotion } from './promotion.entity';
 import { BusinessStaff } from './business-staff.entity';
+import { ListingStatus } from '../enums/listing-status.enum';
 
 @Entity('businesses')
 export class Business extends BaseEntity {
@@ -131,4 +132,31 @@ export class Business extends BaseEntity {
 
   @Column({ name: 'is_featured', type: 'boolean', default: false })
   isFeatured: boolean;
+
+  @Column({
+    name: 'listing_status',
+    type: 'varchar',
+    length: 20,
+    default: ListingStatus.PENDING,
+  })
+  listingStatus: ListingStatus;
+
+  @Column({ name: 'is_public', type: 'boolean', default: false })
+  isPublic: boolean;
+
+  @Column({ name: 'listing_submitted_at', type: 'timestamp', nullable: true })
+  listingSubmittedAt?: Date;
+
+  @Column({ name: 'listing_reviewed_at', type: 'timestamp', nullable: true })
+  listingReviewedAt?: Date;
+
+  @Column({ name: 'listing_reviewed_by_id', type: 'uuid', nullable: true })
+  listingReviewedById?: string;
+
+  @Column({
+    name: 'listing_rejection_reason',
+    type: 'text',
+    nullable: true,
+  })
+  listingRejectionReason?: string | null;
 }

@@ -1,0 +1,39 @@
+# Listing approval (ops / REST Client)
+# @baseUrl = http://localhost:8000/api/v1
+# @adminToken = <Admin or Moderator JWT>
+# @listingId = <business uuid>
+
+### Queue (pending listings)
+GET {{baseUrl}}/admin/listings?status=pending
+Authorization: Bearer {{adminToken}}
+
+### Get one listing (any status)
+GET {{baseUrl}}/admin/listings/{{listingId}}
+Authorization: Bearer {{adminToken}}
+
+### Approve (makes listing public)
+POST {{baseUrl}}/admin/listings/{{listingId}}/approve
+Authorization: Bearer {{adminToken}}
+
+### Reject (keeps listing off the public catalog)
+POST {{baseUrl}}/admin/listings/{{listingId}}/reject
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Incomplete profile — missing logo and address"
+}
+
+### Public catalog (no auth)
+GET {{baseUrl}}/listings
+
+### Public listing by id (404 until approved)
+GET {{baseUrl}}/listings/{{listingId}}
+
+### Merchant resubmit after rejection
+# @merchantToken = <Merchant JWT>
+POST {{baseUrl}}/merchant/listing/submit
+Authorization: Bearer {{merchantToken}}
+Content-Type: application/json
+
+{}

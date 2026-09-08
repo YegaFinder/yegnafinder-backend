@@ -17,6 +17,7 @@ import {
 } from '../dto/create-business.dto';
 import { User } from '../../users/entities/user.entity';
 import { UserRole } from '../../users/enums/user-role.enum';
+import { ListingStatus } from '../enums/listing-status.enum';
 
 @Injectable()
 export class ProfilesService {
@@ -102,10 +103,17 @@ export class ProfilesService {
     const profile = this.businessRepository.create({
       userId,
       ...restDto,
+      listingStatus: ListingStatus.PENDING,
+      isPublic: false,
+      listingSubmittedAt: new Date(),
       isProfileComplete: this.checkMerchantProfileCompletion(dto as any),
     });
 
-    return this.businessRepository.save(profile);
+    const saved = await this.businessRepository.save(profile);
+    return this.businessRepository.findOne({
+      where: { id: saved.id },
+      relations: { user: true, businessHours: true },
+    }) as Promise<Business>;
   }
 
   async getMerchantProfile(userId: string): Promise<Business> {

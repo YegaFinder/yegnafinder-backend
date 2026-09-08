@@ -1,4 +1,12 @@
-import { IsString, IsEnum, IsNotEmpty, Matches } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNotEmpty,
+  Matches,
+  IsInt,
+  IsOptional,
+  Max,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UploadType } from '../services/uploads.service';
 
@@ -19,6 +27,12 @@ export class PresignedUrlRequestDto {
   @ApiProperty({ enum: UploadType, example: UploadType.AVATAR })
   @IsEnum(UploadType)
   uploadType: UploadType;
+
+  @ApiProperty({ example: 24576, maximum: 5242880 })
+  @IsOptional()
+  @IsInt()
+  @Max(5 * 1024 * 1024)
+  fileSize?: number;
 }
 
 export class PresignedUrlResponseDto {

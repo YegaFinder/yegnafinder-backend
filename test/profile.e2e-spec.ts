@@ -8,6 +8,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { ProfileController } from '../src/profiles/controllers/profile.controller';
 import { ProfilesService } from '../src/profiles/services/profiles.service';
+import { UploadsService } from '../src/uploads/services/uploads.service';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../src/common/guards/roles.guard';
 
@@ -40,11 +41,18 @@ describe('ProfileController (e2e)', () => {
     updateCustomerProfile: jest.fn(),
   };
 
+  const mockUploadsService = {
+    replaceFile: jest.fn(),
+    uploadFile: jest.fn(),
+    deleteFile: jest.fn(),
+  };
+
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [ProfileController],
       providers: [
         { provide: ProfilesService, useValue: mockProfilesService },
+        { provide: UploadsService, useValue: mockUploadsService },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -140,9 +148,14 @@ describe('ProfileController (e2e)', () => {
 
   describe('POST /api/v1/profile/avatar', () => {
     it('should upload an avatar', async () => {
+      mockProfilesService.getCustomerProfile.mockResolvedValue(mockProfile);
+      mockUploadsService.uploadFile.mockResolvedValue({
+        fileUrl: 'https://cdn.example.com/uploads/avatars/user-123/test.jpg',
+        key: 'uploads/avatars/user-123/test.jpg',
+      });
       mockProfilesService.updateCustomerProfile.mockResolvedValue({
         ...mockProfile,
-        avatarUrl: 'https://s3.amazonaws.com/bucket/avatars/test.jpg',
+        avatarUrl: 'https://cdn.example.com/uploads/avatars/user-123/test.jpg',
       });
 
       const response = await request(app.getHttpServer())
@@ -151,9 +164,17 @@ describe('ProfileController (e2e)', () => {
         .expect(201);
 
       expect(response.body.avatarUrl).toBeDefined();
+      expect(mockUploadsService.uploadFile).toHaveBeenCalledWith(
+        expect.objectContaining({ originalname: 'test.jpg', mimetype: 'image/jpeg' }),
+        'avatar',
+        mockUser.id,
+      );
       expect(mockProfilesService.updateCustomerProfile).toHaveBeenCalledWith(
         mockUser.id,
-        expect.any(Object),
+        expect.objectContaining({
+          avatarUrl:
+            'https://cdn.example.com/uploads/avatars/user-123/test.jpg',
+        }),
       );
     });
   });

@@ -33,6 +33,7 @@ export class UploadsController {
       dto.contentType,
       dto.uploadType,
       userId,
+      dto.fileSize,
     );
 
     return {

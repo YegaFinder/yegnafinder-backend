@@ -27,6 +27,8 @@ import { FavoritesService } from './services/favorites.service';
 import { SavedPlacesService } from './services/saved-places.service';
 import { PromotionsService } from './services/promotions.service';
 import { BusinessStaffService } from './services/business-staff.service';
+import { BusinessGalleryService } from './services/business-gallery.service';
+import { ListingApprovalService } from './services/listing-approval.service';
 
 import { FavoritesController } from './controllers/favorites.controller';
 import { SavedPlacesController } from './controllers/saved-places.controller';
@@ -34,8 +36,11 @@ import { ProfileController } from './controllers/profile.controller';
 import { MerchantController } from './controllers/merchant.controller';
 import { PromotionsController } from './controllers/promotions.controller';
 import { BusinessStaffController } from './controllers/business-staff.controller';
+import { AdminListingsController } from './controllers/admin-listings.controller';
+import { PublicListingsController } from './controllers/public-listings.controller';
 
 import { UsersModule } from '../users/users.module';
+import { UploadsModule } from '../uploads/uploads.module';
 
 @Module({
   imports: [
@@ -62,9 +67,38 @@ import { UsersModule } from '../users/users.module';
       BusinessStaff,
     ]),
     UsersModule,
+    UploadsModule,
   ],
-  providers: [ProfilesService, BusinessHoursService, FavoritesService, SavedPlacesService, PromotionsService, BusinessStaffService],
-  controllers: [ProfileController, MerchantController, FavoritesController, SavedPlacesController, PromotionsController, BusinessStaffController],
-  exports: [ProfilesService, BusinessHoursService, FavoritesService, SavedPlacesService, PromotionsService, BusinessStaffService, TypeOrmModule],
+  providers: [
+    ProfilesService,
+    BusinessHoursService,
+    FavoritesService,
+    SavedPlacesService,
+    PromotionsService,
+    BusinessStaffService,
+    BusinessGalleryService,
+    ListingApprovalService,
+  ],
+  controllers: [
+    ProfileController,
+    MerchantController,
+    FavoritesController,
+    SavedPlacesController,
+    PromotionsController,
+    BusinessStaffController,
+    AdminListingsController,
+    PublicListingsController,
+  ],
+  exports: [
+    ProfilesService,
+    BusinessHoursService,
+    FavoritesService,
+    SavedPlacesService,
+    PromotionsService,
+    BusinessStaffService,
+    BusinessGalleryService,
+    ListingApprovalService,
+    TypeOrmModule,
+  ],
 })
 export class ProfilesModule {}

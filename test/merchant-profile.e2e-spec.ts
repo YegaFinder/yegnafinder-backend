@@ -9,6 +9,9 @@ import { App } from 'supertest/types';
 import { MerchantController } from '../src/profiles/controllers/merchant.controller';
 import { ProfilesService } from '../src/profiles/services/profiles.service';
 import { BusinessHoursService } from '../src/profiles/services/business-hours.service';
+import { BusinessGalleryService } from '../src/profiles/services/business-gallery.service';
+import { ListingApprovalService } from '../src/profiles/services/listing-approval.service';
+import { UploadsService } from '../src/uploads/services/uploads.service';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../src/common/guards/roles.guard';
 
@@ -55,12 +58,31 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
     getBusinessHours: jest.fn(),
   };
 
+  const mockUploadsService = {
+    replaceFile: jest.fn(),
+    uploadFile: jest.fn(),
+    deleteFile: jest.fn(),
+  };
+
+  const mockGalleryService = {
+    getGallery: jest.fn(),
+    uploadPhotos: jest.fn(),
+    deletePhoto: jest.fn(),
+  };
+
+  const mockListingApprovalService = {
+    submitForApproval: jest.fn(),
+  };
+
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MerchantController],
       providers: [
         { provide: ProfilesService, useValue: mockProfilesService },
         { provide: BusinessHoursService, useValue: mockBusinessHoursService },
+        { provide: UploadsService, useValue: mockUploadsService },
+        { provide: BusinessGalleryService, useValue: mockGalleryService },
+        { provide: ListingApprovalService, useValue: mockListingApprovalService },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -152,11 +174,36 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
     });
   });
 
+  describe('POST /api/v1/merchant/listing/submit', () => {
+    it('should submit the listing for approval', async () => {
+      mockListingApprovalService.submitForApproval.mockResolvedValue({
+        ...mockProfile,
+        listingStatus: 'pending',
+        isPublic: false,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post('/api/v1/merchant/listing/submit')
+        .send({})
+        .expect(201);
+
+      expect(response.body.listingStatus).toBe('pending');
+      expect(mockListingApprovalService.submitForApproval).toHaveBeenCalledWith(
+        mockUser.id,
+      );
+    });
+  });
+
   describe('POST /api/v1/merchant/logo', () => {
     it('should upload a logo', async () => {
+      mockProfilesService.getMerchantProfile.mockResolvedValue(mockProfile);
+      mockUploadsService.uploadFile.mockResolvedValue({
+        fileUrl: 'https://cdn.example.com/uploads/logos/merchant-123/test-logo.jpg',
+        key: 'uploads/logos/merchant-123/test-logo.jpg',
+      });
       mockProfilesService.updateMerchantProfile.mockResolvedValue({
         ...mockProfile,
-        logoUrl: 'https://s3.amazonaws.com/bucket/logos/test-logo.jpg',
+        logoUrl: 'https://cdn.example.com/uploads/logos/merchant-123/test-logo.jpg',
       });
 
       const response = await request(app.getHttpServer())
@@ -165,18 +212,33 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
         .expect(201);
 
       expect(response.body.logoUrl).toBeDefined();
+      expect(mockUploadsService.uploadFile).toHaveBeenCalledWith(
+        expect.objectContaining({ originalname: 'test-logo.jpg', mimetype: 'image/jpeg' }),
+        'logo',
+        mockUser.id,
+      );
       expect(mockProfilesService.updateMerchantProfile).toHaveBeenCalledWith(
         mockUser.id,
-        expect.any(Object),
+        expect.objectContaining({
+          logoUrl:
+            'https://cdn.example.com/uploads/logos/merchant-123/test-logo.jpg',
+        }),
       );
     });
   });
 
   describe('POST /api/v1/merchant/banner', () => {
     it('should upload a banner', async () => {
+      mockProfilesService.getMerchantProfile.mockResolvedValue(mockProfile);
+      mockUploadsService.uploadFile.mockResolvedValue({
+        fileUrl:
+          'https://cdn.example.com/uploads/banners/merchant-123/test-banner.jpg',
+        key: 'uploads/banners/merchant-123/test-banner.jpg',
+      });
       mockProfilesService.updateMerchantProfile.mockResolvedValue({
         ...mockProfile,
-        bannerUrl: 'https://s3.amazonaws.com/bucket/banners/test-banner.jpg',
+        bannerUrl:
+          'https://cdn.example.com/uploads/banners/merchant-123/test-banner.jpg',
       });
 
       const response = await request(app.getHttpServer())
@@ -185,9 +247,10 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
         .expect(201);
 
       expect(response.body.bannerUrl).toBeDefined();
-      expect(mockProfilesService.updateMerchantProfile).toHaveBeenCalledWith(
+      expect(mockUploadsService.uploadFile).toHaveBeenCalledWith(
+        expect.objectContaining({ originalname: 'test-banner.jpg', mimetype: 'image/jpeg' }),
+        'banner',
         mockUser.id,
-        expect.any(Object),
       );
     });
   });
@@ -195,6 +258,7 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
   describe('GET /api/v1/merchant/gallery', () => {
     it('should get merchant gallery', async () => {
       mockProfilesService.getMerchantProfile.mockResolvedValue(mockProfile);
+      mockGalleryService.getGallery.mockResolvedValue([]);
 
       const response = await request(app.getHttpServer())
         .get('/api/v1/merchant/gallery')
@@ -202,15 +266,16 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.gallery).toBeInstanceOf(Array);
-      expect(mockProfilesService.getMerchantProfile).toHaveBeenCalledWith(
-        mockUser.id,
-      );
+      expect(mockGalleryService.getGallery).toHaveBeenCalledWith(mockProfile.id);
     });
   });
 
   describe('POST /api/v1/merchant/gallery', () => {
     it('should upload gallery photos', async () => {
       mockProfilesService.getMerchantProfile.mockResolvedValue(mockProfile);
+      mockGalleryService.uploadPhotos.mockResolvedValue([
+        { id: 'photo-1', mediaUrl: 'https://cdn.example.com/uploads/gallery/a.jpg' },
+      ]);
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/merchant/gallery')
@@ -219,23 +284,23 @@ describe('MerchantController Profile & Gallery (e2e)', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(mockProfilesService.getMerchantProfile).toHaveBeenCalledWith(
-        mockUser.id,
-      );
+      expect(mockGalleryService.uploadPhotos).toHaveBeenCalled();
     });
   });
 
   describe('DELETE /api/v1/merchant/gallery/:id', () => {
     it('should delete a gallery photo', async () => {
       mockProfilesService.getMerchantProfile.mockResolvedValue(mockProfile);
+      mockGalleryService.deletePhoto.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())
         .delete('/api/v1/merchant/gallery/photo-123')
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(mockProfilesService.getMerchantProfile).toHaveBeenCalledWith(
-        mockUser.id,
+      expect(mockGalleryService.deletePhoto).toHaveBeenCalledWith(
+        mockProfile.id,
+        'photo-123',
       );
     });
   });

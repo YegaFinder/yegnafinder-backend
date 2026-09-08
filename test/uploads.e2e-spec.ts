@@ -80,6 +80,7 @@ describe('UploadsController (e2e)', () => {
       'image/jpeg',
       UploadType.AVATAR,
       'user-123',
+      undefined,
     );
   });
 

@@ -14,6 +14,9 @@ export class BusinessGallery extends BaseEntity {
   @Column({ name: 'media_url', type: 'varchar', length: 500 })
   mediaUrl: string;
 
+  @Column({ name: 'storage_key', type: 'varchar', length: 500, nullable: true })
+  storageKey?: string;
+
   @Column({ name: 'media_type', type: 'varchar', length: 20, default: 'image' })
   mediaType: string;
 

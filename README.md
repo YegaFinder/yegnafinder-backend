@@ -23,7 +23,34 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+NestJS backend for YegnaFinder business and customer profiles.
+
+## Sprint 3 operations
+
+### S3 uploads
+
+Avatar, business logo, banner, and gallery endpoints upload directly to the configured S3 bucket using the AWS SDK. Files are limited to 5 MB and accepted image types are JPEG, PNG, and WebP. Object keys are generated as:
+
+`uploads/<category>/<user-id>/<uuid>.<mime-extension>`
+
+Configure `AWS_REGION` and `AWS_S3_BUCKET`. Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` only when the runtime does not provide an AWS credential chain or IAM role. `AWS_S3_CDN_URL` is optional and controls the returned public URL base.
+
+### Listing approval
+
+New business listings start as `pending` and `isPublic=false`. Public endpoints only return rows with both `listing_status='approved'` and `is_public=true`.
+
+Run the migration with `DB_MIGRATIONS_RUN=true` in an environment where `DB_SYNCHRONIZE=false`, or apply `scripts/ops/listing-approval.sql` when using the existing manual database workflow. Existing non-approved rows remain unpublished until ops approves them.
+
+Ops uses an authenticated Admin or Moderator JWT:
+
+```text
+GET  /api/v1/admin/listings?status=pending
+POST /api/v1/admin/listings/:id/approve
+POST /api/v1/admin/listings/:id/reject  {"reason":"..."}
+GET  /api/v1/listings
+```
+
+The ready-to-run REST Client examples are in `scripts/ops/listing-approval.http`; PowerShell equivalents are in `scripts/ops/listing-approval.ps1`. Never place real credentials or tokens in those files.
 
 ## Project setup
 

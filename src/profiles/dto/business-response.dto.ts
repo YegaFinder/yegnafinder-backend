@@ -67,6 +67,21 @@ export class BusinessResponseDto {
   isFeatured: boolean;
 
   @ApiProperty()
+  listingStatus: string;
+
+  @ApiProperty()
+  isPublic: boolean;
+
+  @ApiPropertyOptional()
+  listingSubmittedAt?: Date;
+
+  @ApiPropertyOptional()
+  listingReviewedAt?: Date;
+
+  @ApiPropertyOptional()
+  listingRejectionReason?: string;
+
+  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
@@ -94,6 +109,11 @@ export class BusinessResponseDto {
     this.totalReviews = profile.totalReviews;
     this.isProfileComplete = profile.isProfileComplete;
     this.isFeatured = profile.isFeatured;
+    this.listingStatus = profile.listingStatus;
+    this.isPublic = profile.isPublic;
+    this.listingSubmittedAt = profile.listingSubmittedAt;
+    this.listingReviewedAt = profile.listingReviewedAt;
+    this.listingRejectionReason = profile.listingRejectionReason ?? undefined;
     this.createdAt = profile.createdAt;
     this.updatedAt = profile.updatedAt;
   }

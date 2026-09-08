@@ -9,6 +9,9 @@ import { App } from 'supertest/types';
 import { MerchantController } from '../src/profiles/controllers/merchant.controller';
 import { ProfilesService } from '../src/profiles/services/profiles.service';
 import { BusinessHoursService } from '../src/profiles/services/business-hours.service';
+import { BusinessGalleryService } from '../src/profiles/services/business-gallery.service';
+import { ListingApprovalService } from '../src/profiles/services/listing-approval.service';
+import { UploadsService } from '../src/uploads/services/uploads.service';
 import { JwtAuthGuard } from '../src/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../src/common/guards/roles.guard';
 import { DayOfWeek } from '../src/profiles/entities/business-hours.entity';
@@ -41,6 +44,9 @@ describe('MerchantProfilesController business hours (e2e)', () => {
       providers: [
         { provide: ProfilesService, useValue: mockProfilesService },
         { provide: BusinessHoursService, useValue: mockBusinessHoursService },
+        { provide: BusinessGalleryService, useValue: {} },
+        { provide: ListingApprovalService, useValue: {} },
+        { provide: UploadsService, useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
