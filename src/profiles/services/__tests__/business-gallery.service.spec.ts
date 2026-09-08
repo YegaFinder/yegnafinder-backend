@@ -32,8 +32,13 @@ describe('BusinessGalleryService', () => {
 
     service = module.get(BusinessGalleryService);
     galleryRepository.count.mockResolvedValue(0);
-    galleryRepository.create.mockImplementation((row) => row);
-    galleryRepository.save.mockImplementation(async (row) => ({ id: 'photo-1', ...row }));
+    galleryRepository.create.mockImplementation(
+      (row: Partial<BusinessGallery>) => row as BusinessGallery,
+    );
+    galleryRepository.save.mockImplementation(
+      (row: Partial<BusinessGallery>) =>
+        ({ id: 'photo-1', ...row }) as BusinessGallery,
+    );
   });
 
   afterEach(() => jest.clearAllMocks());

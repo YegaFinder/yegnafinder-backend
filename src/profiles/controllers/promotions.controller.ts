@@ -8,6 +8,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 import { PromotionsService } from '../services/promotions.service';
 import { ProfilesService } from '../services/profiles.service';
+import { Promotion } from '../entities/promotion.entity';
 
 @ApiTags('Promotions')
 @ApiBearerAuth()
@@ -29,7 +30,10 @@ export class PromotionsController {
 
   @Post()
   @ApiOperation({ summary: 'Add a new promotion' })
-  async addPromotion(@CurrentUser() user: User, @Body() data: any) {
+  async addPromotion(
+    @CurrentUser() user: User,
+    @Body() data: Partial<Promotion>,
+  ) {
     const profile = await this.profilesService.getMerchantProfile(user.id);
     return this.promotionsService.addPromotion(profile.id, data);
   }

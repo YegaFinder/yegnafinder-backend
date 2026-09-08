@@ -18,10 +18,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     const exceptionResponse = exception.getResponse();
-    const detailedMessage =
-      typeof exceptionResponse === 'object' && exceptionResponse !== null
-        ? (exceptionResponse as any).message
-        : exception.message;
+    const detailedMessage = this.getExceptionMessage(exceptionResponse, exception);
 
     const errorResponse = {
       statusCode: status,
@@ -36,5 +33,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
 
     response.status(status).json(errorResponse);
+  }
+
+  private getExceptionMessage(
+    exceptionResponse: string | object,
+    exception: HttpException,
+  ): string | string[] | null {
+    if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+      const message = (exceptionResponse as Record<string, unknown>).message;
+      if (typeof message === 'string' || Array.isArray(message)) {
+        return message as string | string[];
+      }
+    }
+    return exception.message || null;
   }
 }

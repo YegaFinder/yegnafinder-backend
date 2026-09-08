@@ -33,7 +33,6 @@ import { ListingApprovalService } from '../services/listing-approval.service';
 import { UploadsService, UploadType } from '../../uploads/services/uploads.service';
 import type { UploadedFileInput } from '../../uploads/services/uploads.service';
 import { IMAGE_UPLOAD_INTERCEPTOR_OPTIONS } from '../../uploads/upload-limits';
-import { SubmitListingDto } from '../dto/listing-approval.dto';
 
 @ApiTags('Merchant')
 @ApiBearerAuth()
@@ -82,7 +81,6 @@ export class MerchantController {
   })
   async submitListing(
     @CurrentUser() user: User,
-    @Body() _dto: SubmitListingDto,
   ): Promise<BusinessResponseDto> {
     const profile = await this.listingApprovalService.submitForApproval(user.id);
     return new BusinessResponseDto(profile);

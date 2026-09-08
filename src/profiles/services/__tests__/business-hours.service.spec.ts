@@ -96,7 +96,7 @@ describe('BusinessHoursService', () => {
         .mockImplementation((data) => data as BusinessHours);
       const saveSpy = jest
         .spyOn(businessHoursRepository, 'save')
-        .mockResolvedValue(createdHours as any);
+        .mockResolvedValue(createdHours as BusinessHours[]);
 
       const result = await service.updateBusinessHours(
         merchantProfileId,

@@ -19,6 +19,11 @@ import { User } from '../../users/entities/user.entity';
 import { UserRole } from '../../users/enums/user-role.enum';
 import { ListingStatus } from '../enums/listing-status.enum';
 
+type MerchantCompletionInput = Pick<
+  Business,
+  'businessName' | 'description' | 'logoUrl' | 'businessAddress' | 'contactPhone'
+>;
+
 @Injectable()
 export class ProfilesService {
   constructor(
@@ -106,7 +111,7 @@ export class ProfilesService {
       listingStatus: ListingStatus.PENDING,
       isPublic: false,
       listingSubmittedAt: new Date(),
-      isProfileComplete: this.checkMerchantProfileCompletion(dto as any),
+      isProfileComplete: this.checkMerchantProfileCompletion(dto),
     });
 
     const saved = await this.businessRepository.save(profile);
@@ -132,7 +137,7 @@ export class ProfilesService {
     const profile = await this.getMerchantProfile(userId);
     const { businessCategories, ...restDto } = dto;
     Object.assign(profile, restDto);
-    profile.isProfileComplete = this.checkMerchantProfileCompletion(profile as any);
+    profile.isProfileComplete = this.checkMerchantProfileCompletion(profile);
     return this.businessRepository.save(profile);
   }
 
@@ -144,7 +149,7 @@ export class ProfilesService {
   }
 
   private checkMerchantProfileCompletion(
-    profile: Partial<Business>,
+    profile: Partial<MerchantCompletionInput>,
   ): boolean {
     return !!(
       profile.businessName &&
