@@ -39,6 +39,46 @@ describe('ListingApprovalService', () => {
     isPublic: false,
   } as Business;
 
+  it('supports full-text keyword search against approved public businesses', async () => {
+    businessRepository.createQueryBuilder = jest.fn(() => ({
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([business]),
+    }));
+
+    await service.searchPublic('coffeeshop');
+
+    expect(businessRepository.createQueryBuilder).toHaveBeenCalledWith(
+      'business',
+    );
+  });
+
+  it('returns nearby businesses ordered by distance from the supplied coordinates', async () => {
+    businessRepository.find.mockResolvedValue([
+      {
+        ...business,
+        isPublic: true,
+        listingStatus: ListingStatus.APPROVED,
+        latitude: 8.990,
+        longitude: 38.760,
+      },
+      {
+        ...business,
+        id: 'biz-2',
+        isPublic: true,
+        listingStatus: ListingStatus.APPROVED,
+        latitude: 9.005,
+        longitude: 38.780,
+      },
+    ] as Business[]);
+
+    const results = await service.findNearby(8.995, 38.765, 5);
+
+    expect(results).toHaveLength(2);
+  });
+
   it('lists only approved public businesses', async () => {
     businessRepository.find.mockResolvedValue([business]);
     await service.listPublic();

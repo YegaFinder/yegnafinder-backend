@@ -81,6 +81,9 @@ export class BusinessResponseDto {
   @ApiPropertyOptional()
   listingRejectionReason?: string;
 
+  @ApiPropertyOptional()
+  distanceKm?: number;
+
   @ApiProperty()
   createdAt: Date;
 

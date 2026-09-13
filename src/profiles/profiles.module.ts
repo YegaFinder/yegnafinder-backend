@@ -11,6 +11,7 @@ import { BusinessDocument } from './entities/business-document.entity';
 import { RecentSearch } from './entities/recent-search.entity';
 import { RecentView } from './entities/recent-view.entity';
 import { Notification } from './entities/notification.entity';
+import { Message } from './entities/message.entity';
 import { UserSetting } from './entities/user-setting.entity';
 import { Language } from './entities/language.entity';
 import { Address } from './entities/address.entity';
@@ -20,6 +21,7 @@ import { BusinessReview } from './entities/business-review.entity';
 import { BusinessFollower } from './entities/business-follower.entity';
 import { Promotion } from './entities/promotion.entity';
 import { BusinessStaff } from './entities/business-staff.entity';
+import { Payment } from './payments/payment.entity';
 
 import { ProfilesService } from './services/profiles.service';
 import { BusinessHoursService } from './services/business-hours.service';
@@ -29,6 +31,10 @@ import { PromotionsService } from './services/promotions.service';
 import { BusinessStaffService } from './services/business-staff.service';
 import { BusinessGalleryService } from './services/business-gallery.service';
 import { ListingApprovalService } from './services/listing-approval.service';
+import { MessagesService } from './services/messages.service';
+import { NotificationService } from './services/notification.service';
+import { PaymentService } from './services/payment.service';
+import { MockPaymentGateway } from './payments/payment-gateway.provider';
 
 import { FavoritesController } from './controllers/favorites.controller';
 import { SavedPlacesController } from './controllers/saved-places.controller';
@@ -38,9 +44,13 @@ import { PromotionsController } from './controllers/promotions.controller';
 import { BusinessStaffController } from './controllers/business-staff.controller';
 import { AdminListingsController } from './controllers/admin-listings.controller';
 import { PublicListingsController } from './controllers/public-listings.controller';
+import { BusinessDiscoveryController } from './controllers/business-discovery.controller';
+import { BusinessMessagingController } from './controllers/business-messaging.controller';
+import { PaymentController } from './controllers/payment.controller';
 
 import { UsersModule } from '../users/users.module';
 import { UploadsModule } from '../uploads/uploads.module';
+import { MailService } from '../common/services/mail.service';
 
 @Module({
   imports: [
@@ -56,6 +66,7 @@ import { UploadsModule } from '../uploads/uploads.module';
       RecentSearch,
       RecentView,
       Notification,
+      Message,
       UserSetting,
       Language,
       Address,
@@ -65,6 +76,7 @@ import { UploadsModule } from '../uploads/uploads.module';
       BusinessFollower,
       Promotion,
       BusinessStaff,
+      Payment,
     ]),
     UsersModule,
     UploadsModule,
@@ -78,6 +90,11 @@ import { UploadsModule } from '../uploads/uploads.module';
     BusinessStaffService,
     BusinessGalleryService,
     ListingApprovalService,
+    MessagesService,
+    NotificationService,
+    MailService,
+    PaymentService,
+    MockPaymentGateway,
   ],
   controllers: [
     ProfileController,
@@ -88,6 +105,9 @@ import { UploadsModule } from '../uploads/uploads.module';
     BusinessStaffController,
     AdminListingsController,
     PublicListingsController,
+    BusinessDiscoveryController,
+    BusinessMessagingController,
+    PaymentController,
   ],
   exports: [
     ProfilesService,
@@ -98,6 +118,8 @@ import { UploadsModule } from '../uploads/uploads.module';
     BusinessStaffService,
     BusinessGalleryService,
     ListingApprovalService,
+    MessagesService,
+    NotificationService,
     TypeOrmModule,
   ],
 })
