@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 import { ReviewsService } from '../services/reviews.service';
@@ -24,6 +25,7 @@ export class ReviewsController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all reviews for a business' })
   async getReviews(@Param('businessId') businessId: string) {
     return this.reviewsService.getBusinessReviews(businessId);

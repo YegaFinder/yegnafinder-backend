@@ -1,19 +1,25 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
+import { Booking } from '../entities/booking.entity';
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
 
 @Entity('payments')
 export class Payment extends BaseEntity {
+  @ManyToOne(() => Booking)
+  @JoinColumn({ name: 'booking_id' })
+  booking: Booking;
+
   @Column({ name: 'booking_id', type: 'uuid' })
   bookingId: string;
 
-  @Column({ name: 'customer_id', type: 'uuid' })
-  customerId: string;
-
-  @Column({ name: 'gateway', type: 'varchar', length: 50, default: 'mock' })
-  gateway: string;
-
-  @Column({ name: 'gateway_transaction_id', type: 'varchar', length: 255, nullable: true })
-  gatewayTransactionId?: string;
+  @Column({ name: 'tx_ref', type: 'varchar', length: 255, unique: true })
+  txRef: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
@@ -21,21 +27,13 @@ export class Payment extends BaseEntity {
   @Column({ type: 'varchar', length: 8, default: 'ETB' })
   currency: string;
 
-  @Column({ name: 'status', type: 'varchar', length: 50, default: 'PENDING' })
-  status: string;
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  status: PaymentStatus;
 
-  @Column({ name: 'checkout_url', type: 'varchar', length: 500, nullable: true })
-  checkoutUrl?: string;
-
-  @Column({ name: 'return_url', type: 'varchar', length: 500, nullable: true })
-  returnUrl?: string;
-
-  @Column({ name: 'paid_at', type: 'timestamp', nullable: true })
-  paidAt?: Date;
-
-  @Column({ name: 'refund_status', type: 'varchar', length: 50, nullable: true })
-  refundStatus?: string;
-
-  @Column({ name: 'refund_reference', type: 'varchar', length: 255, nullable: true })
-  refundReference?: string;
+  @Column({ name: 'chapa_response', type: 'jsonb', nullable: true })
+  chapaResponse?: any;
 }

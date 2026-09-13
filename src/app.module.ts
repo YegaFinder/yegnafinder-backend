@@ -10,6 +10,9 @@ import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CommonModule } from './common/common.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { ChatModule } from './chat/chat.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PaymentsSpikeModule } from './payments-spike/payments-spike.module';
 
 import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
@@ -37,6 +40,9 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     UsersModule,
     ProfilesModule,
     UploadsModule,
+    ChatModule,
+    NotificationsModule,
+    PaymentsSpikeModule,
   ],
   controllers: [AppController],
   providers: [

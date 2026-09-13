@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Public } from '../../common/decorators/public.decorator';
 import { CategoriesService } from '../services/categories.service';
 
 // DTOs for category creation
@@ -34,6 +35,7 @@ export class CategoriesController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all top-level business categories with subcategories' })
   async findAll() {
     const categories = await this.categoriesService.findAll();
@@ -41,6 +43,7 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a specific business category by ID' })
   async findOne(@Param('id') id: string) {
     const category = await this.categoriesService.findOne(id);

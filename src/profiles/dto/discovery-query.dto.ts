@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsNumber, IsUUID, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsUUID, Min, Max, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DiscoveryQueryDto {
   @ApiPropertyOptional({ description: 'Search term for business name or description' })
@@ -30,6 +30,67 @@ export class DiscoveryQueryDto {
   lng?: number;
 
   @ApiPropertyOptional({ description: 'Radius in km for nearby search', default: 10 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  radius?: number = 10;
+
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 10 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  limit?: number = 10;
+}
+
+export class SearchQueryDto {
+  @ApiProperty({ description: 'Search term for business name or description' })
+  @IsNotEmpty()
+  @IsString()
+  q: string;
+
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 10 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  limit?: number = 10;
+}
+
+export class NearbyQueryDto {
+  @ApiProperty({ description: 'Latitude coordinate' })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat: number;
+
+  @ApiProperty({ description: 'Longitude coordinate' })
+  @Type(() => Number)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng: number;
+
+  @ApiPropertyOptional({ description: 'Search radius in kilometers', default: 10 })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

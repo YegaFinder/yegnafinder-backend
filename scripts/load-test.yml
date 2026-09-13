@@ -1,0 +1,137 @@
+config:
+  target: 'http://localhost:8000'
+  phases:
+    - duration: 300  # 5 minutes ramp-up
+      arrivalRate: 5
+      rampTo: 20
+    - duration: 300  # 5 minutes sustained load
+      arrivalRate: 20
+    - duration: 300  # 5 minutes ramp-down
+      arrivalRate: 20
+      rampTo: 5
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+  processor: './load-test-functions.js'
+
+scenarios:
+  - name: "Business Discovery Flow"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/v1/businesses"
+          capture:
+            - json: "$.data.items[0].id"
+              as: "businessId"
+      - get:
+          url: "/api/v1/businesses/search?q=coffee&page=1&limit=10"
+      - get:
+          url: "/api/v1/businesses/nearby?lat=9.005&lng=38.763&radius=10&page=1&limit=10"
+      - get:
+          url: "/api/v1/businesses/{{ businessId }}"
+          ifTrue: "businessId"
+
+  - name: "Authentication Flow"
+    weight: 20
+    flow:
+      - post:
+          url: "/api/v1/auth/register"
+          json:
+            firstName: "{{ $randomFirstName() }}"
+            lastName: "{{ $randomLastName() }}"
+            email: "{{ $randomEmail() }}"
+            phoneNumber: "{{ $randomPhoneNumber() }}"
+            password: "Password123!"
+            role: "customer"
+          capture:
+            - json: "$.data.user.id"
+              as: "userId"
+      - think: 2
+      - post:
+          url: "/api/v1/auth/login"
+          json:
+            email: "test@example.com"
+            password: "Password123!"
+          capture:
+            - json: "$.data.accessToken"
+              as: "accessToken"
+
+  - name: "Booking Flow (Authenticated)"
+    weight: 25
+    flow:
+      - function: "setAuthToken"
+      - get:
+          url: "/api/v1/businesses"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          capture:
+            - json: "$.data.items[0].id"
+              as: "businessId"
+      - post:
+          url: "/api/v1/bookings"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            businessId: "{{ businessId }}"
+            appointmentTime: "{{ $futureDate() }}"
+            notes: "Load test booking"
+          capture:
+            - json: "$.data.id"
+              as: "bookingId"
+          ifTrue: "businessId"
+
+  - name: "Chat Flow (WebSocket simulation via HTTP)"
+    weight: 10
+    flow:
+      - function: "setAuthToken"
+      - get:
+          url: "/api/v1/businesses"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          capture:
+            - json: "$.data.items[0].id"
+              as: "businessId"
+      - post:
+          url: "/api/v1/messages"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            businessId: "{{ businessId }}"
+            text: "Hello, I'm interested in your services"
+          ifTrue: "businessId"
+      - get:
+          url: "/api/v1/messages/{{ businessId }}?page=1&limit=20"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          ifTrue: "businessId"
+
+  - name: "Payment Flow"
+    weight: 5
+    flow:
+      - function: "setAuthToken"
+      - get:
+          url: "/api/v1/businesses"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          capture:
+            - json: "$.data.items[0].id"
+              as: "businessId"
+      - post:
+          url: "/api/v1/bookings"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            businessId: "{{ businessId }}"
+            appointmentTime: "{{ $futureDate() }}"
+            notes: "Payment test booking"
+          capture:
+            - json: "$.data.id"
+              as: "bookingId"
+          ifTrue: "businessId"
+      - post:
+          url: "/api/v1/payments/initiate"
+          headers:
+            Authorization: "Bearer {{ accessToken }}"
+          json:
+            bookingId: "{{ bookingId }}"
+          ifTrue: "bookingId"

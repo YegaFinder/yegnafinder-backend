@@ -3,6 +3,7 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
 import { BusinessHours } from './business-hours.entity';
 import { BusinessCategory } from './business-category.entity';
+import { BusinessGallery } from './business-gallery.entity';
 import { Promotion } from './promotion.entity';
 import { BusinessStaff } from './business-staff.entity';
 import { ListingStatus } from '../enums/listing-status.enum';
@@ -94,6 +95,11 @@ export class Business extends BaseEntity {
     cascade: true,
   })
   businessHours: BusinessHours[];
+
+  @OneToMany(() => BusinessGallery, (gallery) => gallery.business, {
+    cascade: true,
+  })
+  galleries: BusinessGallery[];
 
   @OneToMany(() => Promotion, (promotion) => promotion.business, {
     cascade: true,

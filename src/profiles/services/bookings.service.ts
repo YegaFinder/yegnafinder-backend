@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking, BookingStatus } from '../entities/booking.entity';
 import { Business } from '../entities/business.entity';
+import { NotificationService } from './notification.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class BookingsService {
     private readonly bookingRepository: Repository<Booking>,
     @InjectRepository(Business)
     private readonly businessRepository: Repository<Business>,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async createBooking(customerId: string, dto: CreateBookingDto): Promise<Booking> {
@@ -33,7 +35,20 @@ export class BookingsService {
       status: BookingStatus.PENDING,
     });
 
-    return this.bookingRepository.save(booking);
+    const savedBooking = await this.bookingRepository.save(booking);
+    
+    // Load full booking with relations for notifications
+    const fullBooking = await this.bookingRepository.findOne({
+      where: { id: savedBooking.id },
+      relations: ['customer', 'business'],
+    });
+
+    // Fire booking confirmation notification
+    if (fullBooking) {
+      await this.notificationService.sendBookingConfirmation(fullBooking);
+    }
+
+    return savedBooking;
   }
 
   async getCustomerBookings(customerId: string): Promise<Booking[]> {
@@ -64,17 +79,28 @@ export class BookingsService {
       throw new NotFoundException('No business found for this merchant');
     }
 
-    const booking = await this.bookingRepository.findOne({ where: { id: bookingId, businessId: business.id } });
+    const booking = await this.bookingRepository.findOne({ 
+      where: { id: bookingId, businessId: business.id },
+      relations: ['customer', 'business'],
+    });
     if (!booking) {
       throw new NotFoundException('Booking not found or does not belong to your business');
     }
 
     booking.status = status;
-    return this.bookingRepository.save(booking);
+    const updatedBooking = await this.bookingRepository.save(booking);
+
+    // Fire booking status update notification
+    await this.notificationService.sendBookingStatusUpdate(updatedBooking, status);
+
+    return updatedBooking;
   }
 
   async cancelBooking(customerId: string, bookingId: string): Promise<Booking> {
-    const booking = await this.bookingRepository.findOne({ where: { id: bookingId, customerId } });
+    const booking = await this.bookingRepository.findOne({ 
+      where: { id: bookingId, customerId },
+      relations: ['customer', 'business'],
+    });
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
@@ -84,6 +110,11 @@ export class BookingsService {
     }
 
     booking.status = BookingStatus.CANCELLED;
-    return this.bookingRepository.save(booking);
+    const cancelledBooking = await this.bookingRepository.save(booking);
+
+    // Fire booking status update notification for cancellation
+    await this.notificationService.sendBookingStatusUpdate(cancelledBooking, BookingStatus.CANCELLED);
+
+    return cancelledBooking;
   }
 }

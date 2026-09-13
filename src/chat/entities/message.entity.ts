@@ -1,8 +1,8 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 
-@Entity('messages')
-export class Message extends BaseEntity {
+@Entity('chat_messages')
+export class ChatMessage extends BaseEntity {
   @Column({ name: 'business_id', type: 'uuid' })
   businessId: string;
 

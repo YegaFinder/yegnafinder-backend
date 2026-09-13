@@ -10,6 +10,12 @@ export enum BookingStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export enum PaymentStatus {
+  UNPAID = 'UNPAID',
+  PAID = 'PAID',
+  REFUNDED = 'REFUNDED',
+}
+
 @Entity('bookings')
 export class Booking extends BaseEntity {
   @ManyToOne(() => User, { eager: true })
@@ -32,6 +38,14 @@ export class Booking extends BaseEntity {
     default: BookingStatus.PENDING,
   })
   status: BookingStatus;
+
+  @Column({
+    name: 'payment_status',
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.UNPAID,
+  })
+  paymentStatus: PaymentStatus;
 
   @Column({ name: 'appointment_time', type: 'timestamp' })
   appointmentTime: Date;
