@@ -41,12 +41,15 @@ export class ListingApprovalService {
     });
   }
 
-  async listPublic(): Promise<Business[]> {
-    return this.businessRepository.find({
+  async listPublic(page: number = 1, limit: number = 10): Promise<{ data: Business[]; total: number }> {
+    const [data, total] = await this.businessRepository.findAndCount({
       where: { isPublic: true, listingStatus: ListingStatus.APPROVED },
       relations: { user: true, businessHours: true },
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    return { data, total };
   }
 
   async searchPublicPaginated(
@@ -353,6 +356,22 @@ export class ListingApprovalService {
     business.listingReviewedAt = new Date();
     business.listingReviewedById = adminUserId;
     business.listingRejectionReason = reason;
+    return this.businessRepository.save(business);
+  }
+
+  async verifyBusiness(id: string, adminUserId: string): Promise<Business> {
+    const business = await this.getById(id);
+    business.verificationStatus = 'verified';
+    business.listingReviewedAt = new Date();
+    business.listingReviewedById = adminUserId;
+    return this.businessRepository.save(business);
+  }
+
+  async unverifyBusiness(id: string, adminUserId: string): Promise<Business> {
+    const business = await this.getById(id);
+    business.verificationStatus = 'pending';
+    business.listingReviewedAt = new Date();
+    business.listingReviewedById = adminUserId;
     return this.businessRepository.save(business);
   }
 }

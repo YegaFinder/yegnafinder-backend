@@ -79,4 +79,24 @@ export class AdminListingsController {
     );
     return new BusinessResponseDto(business);
   }
+
+  @Post(':id/verify')
+  @ApiOperation({ summary: 'Mark a business as verified' })
+  async verify(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+  ): Promise<BusinessResponseDto> {
+    const business = await this.listingApprovalService.verifyBusiness(id, user.id);
+    return new BusinessResponseDto(business);
+  }
+
+  @Post(':id/unverify')
+  @ApiOperation({ summary: 'Mark a business as unverified (pending)' })
+  async unverify(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+  ): Promise<BusinessResponseDto> {
+    const business = await this.listingApprovalService.unverifyBusiness(id, user.id);
+    return new BusinessResponseDto(business);
+  }
 }

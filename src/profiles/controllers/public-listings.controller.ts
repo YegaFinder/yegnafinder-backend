@@ -22,9 +22,17 @@ export class PublicListingsController {
   @ApiOperation({
     summary: 'List approved public business listings',
   })
-  async list(): Promise<{ listings: BusinessResponseDto[] }> {
-    const businesses = await this.listingApprovalService.listPublic();
-    return { listings: businesses.map((b) => new BusinessResponseDto(b)) };
+  async list(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ): Promise<{ listings: BusinessResponseDto[]; meta: { total: number; page: number; limit: number } }> {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 10);
+    const { data: businesses, total } = await this.listingApprovalService.listPublic(pageNum, limitNum);
+    return { 
+      listings: businesses.map((b) => new BusinessResponseDto(b)),
+      meta: { total, page: pageNum, limit: limitNum }
+    };
   }
 
   @Public()

@@ -15,12 +15,21 @@ import { databaseConfig } from './config/database.config';
 import { redisConfig } from './config/redis.config';
 import { validate } from './config/env.validation';
 
+import { ThrottlerModule } from '@nestjs/throttler';
+
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validate,
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60,
+      limit: 100,
+    }]),
     TypeOrmModule.forRootAsync(databaseConfig),
     CacheModule.registerAsync(redisConfig),
     CommonModule,
@@ -30,6 +39,12 @@ import { validate } from './config/env.validation';
     UploadsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    }
+  ],
 })
 export class AppModule {}

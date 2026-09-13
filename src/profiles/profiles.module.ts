@@ -22,6 +22,7 @@ import { BusinessFollower } from './entities/business-follower.entity';
 import { Promotion } from './entities/promotion.entity';
 import { BusinessStaff } from './entities/business-staff.entity';
 import { Payment } from './payments/payment.entity';
+import { Booking } from './entities/booking.entity';
 
 import { ProfilesService } from './services/profiles.service';
 import { BusinessHoursService } from './services/business-hours.service';
@@ -35,6 +36,11 @@ import { MessagesService } from './services/messages.service';
 import { NotificationService } from './services/notification.service';
 import { PaymentService } from './services/payment.service';
 import { MockPaymentGateway } from './payments/payment-gateway.provider';
+import { ReviewsService } from './services/reviews.service';
+import { BookingsService } from './services/bookings.service';
+import { CategoriesService } from './services/categories.service';
+import { DiscoveryService } from './services/discovery.service';
+import { AdminAnalyticsService } from './services/admin-analytics.service';
 
 import { FavoritesController } from './controllers/favorites.controller';
 import { SavedPlacesController } from './controllers/saved-places.controller';
@@ -47,6 +53,12 @@ import { PublicListingsController } from './controllers/public-listings.controll
 import { BusinessDiscoveryController } from './controllers/business-discovery.controller';
 import { BusinessMessagingController } from './controllers/business-messaging.controller';
 import { PaymentController } from './controllers/payment.controller';
+import { ReviewsController } from './controllers/reviews.controller';
+import { BookingsController } from './controllers/bookings.controller';
+import { CategoriesController } from './controllers/categories.controller';
+import { DiscoveryController } from './controllers/discovery.controller';
+import { AdminAnalyticsController } from './controllers/admin-analytics.controller';
+import { AdminReviewsController } from './controllers/admin-reviews.controller';
 
 import { UsersModule } from '../users/users.module';
 import { UploadsModule } from '../uploads/uploads.module';
@@ -55,8 +67,8 @@ import { MailService } from '../common/services/mail.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Profile, 
-      Business, 
+      Profile,
+      Business,
       BusinessHours,
       Favorite,
       SavedPlace,
@@ -77,6 +89,7 @@ import { MailService } from '../common/services/mail.service';
       Promotion,
       BusinessStaff,
       Payment,
+      Booking,
     ]),
     UsersModule,
     UploadsModule,
@@ -95,6 +108,11 @@ import { MailService } from '../common/services/mail.service';
     MailService,
     PaymentService,
     MockPaymentGateway,
+    ReviewsService,
+    BookingsService,
+    CategoriesService,
+    DiscoveryService,
+    AdminAnalyticsService,
   ],
   controllers: [
     ProfileController,
@@ -108,6 +126,12 @@ import { MailService } from '../common/services/mail.service';
     BusinessDiscoveryController,
     BusinessMessagingController,
     PaymentController,
+    ReviewsController,
+    BookingsController,
+    CategoriesController,
+    DiscoveryController,
+    AdminAnalyticsController,
+    AdminReviewsController,
   ],
   exports: [
     ProfilesService,
@@ -120,6 +144,11 @@ import { MailService } from '../common/services/mail.service';
     ListingApprovalService,
     MessagesService,
     NotificationService,
+    ReviewsService,
+    BookingsService,
+    CategoriesService,
+    DiscoveryService,
+    AdminAnalyticsService,
     TypeOrmModule,
   ],
 })

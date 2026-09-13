@@ -117,4 +117,24 @@ export class UsersService {
     });
     return this.usersRepository.save(user);
   }
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    role?: UserRole,
+  ): Promise<{ data: User[]; total: number }> {
+    const where = role ? { role } : {};
+    const [data, total] = await this.usersRepository.findAndCount({
+      where,
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { data, total };
+  }
+
+  async updateStatus(id: string, isActive: boolean): Promise<User> {
+    const user = await this.findById(id);
+    user.isActive = isActive;
+    return this.usersRepository.save(user);
+  }
 }

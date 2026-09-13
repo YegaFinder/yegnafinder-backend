@@ -48,8 +48,22 @@ export class BusinessResponseDto {
   @ApiProperty()
   servicesOffered: Array<any>;
 
-  @ApiProperty()
-  businessHours: Array<any>;
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        dayOfWeek: { type: 'string' },
+        openTime: { type: 'string', nullable: true },
+        closeTime: { type: 'string', nullable: true },
+        isClosed: { type: 'boolean' },
+        is24Hours: { type: 'boolean' },
+        breakStartTime: { type: 'string', nullable: true },
+        breakEndTime: { type: 'string', nullable: true },
+      },
+    },
+  })
+  businessHours: any[];
 
   @ApiProperty()
   verificationStatus: string;
