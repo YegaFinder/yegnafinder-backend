@@ -4,6 +4,7 @@ import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';  // ✅ FIXED: Added import
 import { CreateMessageDto, ConversationQueryDto } from './dto/chat.dto';
 
 @ApiTags('Chat')
@@ -34,15 +35,23 @@ export class ChatController {
   async getConversation(
     @Param('businessId') businessId: string,
     @Query() query: ConversationQueryDto,
+    @Request() req,  // ✅ FIXED: Get user info for access control
   ) {
     const { page = 1, limit = 50 } = query;
-    const conversation = await this.chatService.getConversation(businessId, page, limit);
+    // ✅ FIXED: Pass user info to service for access control
+    const conversation = await this.chatService.getConversation(
+      businessId,
+      page,
+      limit,
+      req.user?.id,
+      req.user?.role,
+    );
     return { data: conversation };
   }
 
   @Get('merchant/threads')
   @UseGuards(RolesGuard)
-  @Roles('merchant')
+  @Roles(UserRole.MERCHANT)  // ✅ FIXED: Use enum instead of lowercase string
   @ApiOperation({ summary: 'Get customer conversation threads for merchant' })
   @ApiResponse({ status: 200, description: 'Threads retrieved successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

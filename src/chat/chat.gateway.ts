@@ -78,7 +78,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const { businessId, text } = data;
       const senderId = client.user.id;
-      const senderRole = client.user.role === 'merchant' ? 'MERCHANT' : 'CUSTOMER';
+      // ✅ FIXED: Use proper enum comparison instead of lowercase string
+      const senderRole = client.user.role === 'Merchant' ? 'MERCHANT' : 'CUSTOMER';
 
       // Save message to database
       const savedMessage = await this.chatService.createMessage(senderId, senderRole, businessId, text);

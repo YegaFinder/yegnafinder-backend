@@ -30,6 +30,8 @@ export class ChatService {
     businessId: string,
     page: number = 1,
     limit: number = 50,
+    userId?: string,  // ✅ FIXED: Added for access control
+    userRole?: string,  // ✅ FIXED: Added for access control
   ): Promise<{
     items: ChatMessage[];
     total: number;
@@ -39,8 +41,20 @@ export class ChatService {
   }> {
     const skip = (page - 1) * limit;
 
+    // ✅ FIXED: Add basic ownership validation
+    // TODO: Add proper merchant business ownership check
+    let whereClause: any = { businessId };
+
+    if (userRole === 'Customer' && userId) {
+      // Customers can only see messages they sent
+      whereClause = {
+        businessId,
+        senderId: userId,
+      };
+    }
+
     const [messages, total] = await this.messageRepository.findAndCount({
-      where: { businessId },
+      where: whereClause,
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
